@@ -35,7 +35,6 @@ async function clientDemo() {
 }
 
 // Use a self-calling function so we can use async / await.
-
 (async () => {
   const poolResult = await poolDemo();
   console.log("Time with pool: " + poolResult.rows[0]["name"]);
