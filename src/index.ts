@@ -1,5 +1,9 @@
 import pg from "pg";
 const { Pool, Client } = pg;
+import express from "express";
+const app = express();
+
+const port = 3000;
 
 const credentials = {
   user: "postgres",
@@ -36,3 +40,12 @@ async function clientDemo() {
   const poolResult = await poolDemo();
   console.log("Time with pool: " + poolResult.rows[0]["name"]);
 })();
+
+app.get("/", async (req, res) => {
+  const poolResult = await poolDemo();
+  res.send(poolResult.rows[0]["name"]);
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
