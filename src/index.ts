@@ -35,6 +35,30 @@ app.get("/planets/:id", async (req, res) => {
   }
 });
 
+app.post("/users/:id/speedboost", async (req, res) => {
+  try {
+    const user = await pool.query(
+      "SELECT * from users WHERE user_id = $1 AND last_boost < current_timestamp - interval '12 hour'",
+      [req.params.id]
+    );
+
+    if (!user.rowCount) {
+      res.json("User did not recieve speed boost");
+      return;
+    }
+
+    await pool.query(
+      "UPDATE users SET last_boost = current_timestamp WHERE user_id = $1",
+      [req.params.id]
+    );
+    res.status(200);
+    res.json("User recieved speed boost");
+  } catch (e) {
+    console.log(e);
+    res.status(500);
+  }
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
