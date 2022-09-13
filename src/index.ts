@@ -13,36 +13,26 @@ const credentials = {
   port: 5432,
 };
 
-// Connect with a connection pool.
+const pool = new Pool(credentials);
 
-async function poolDemo() {
-  const pool = new Pool(credentials);
-  const now = await pool.query("SELECT * from planets");
-  await pool.end();
+app.get("/planets", async (req, res) => {
+  const result = await pool.query("SELECT * from planets");
 
-  return now;
-}
+  res.json(result.rows);
+});
 
-// Connect with a client.
+app.get("/planets/:id", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * from planets WHERE planet_id = $1",
+      [req.params.id]
+    );
 
-async function clientDemo() {
-  const client = new Client(credentials);
-  await client.connect();
-  const now = await client.query("SELECT * from planets");
-  await client.end();
-
-  return now;
-}
-
-// Use a self-calling function so we can use async / await.
-(async () => {
-  const poolResult = await poolDemo();
-  console.log("Time with pool: " + poolResult.rows[0]["name"]);
-})();
-
-app.get("/", async (req, res) => {
-  const poolResult = await poolDemo();
-  res.send(poolResult.rows[0]["name"]);
+    res.json(result.rows);
+  } catch (e) {
+    console.log(e);
+    res.status(500);
+  }
 });
 
 app.listen(port, () => {
