@@ -1,9 +1,18 @@
 import pg from "pg";
 const { Pool, Client } = pg;
 import express from "express";
+import { MikroORM } from "@mikro-orm/core";
+import mikroOrmConfig from "./mikro-orm.config";
 const app = express();
 
 const port = 3000;
+
+const initOrm = async () => {
+  const orm = await MikroORM.init(mikroOrmConfig);
+  await orm.getMigrator().up();
+};
+
+initOrm();
 
 const credentials = {
   user: "postgres",
