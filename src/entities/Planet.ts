@@ -2,12 +2,15 @@ import { Entity, Property } from "@mikro-orm/core";
 import { Base } from "./Base";
 
 @Entity()
-export class User extends Base {
+export class Planet extends Base {
   @Property()
-  uid!: string;
+  name!: string;
 
   @Property()
-  username!: string;
+  radius!: number;
+
+  @Property()
+  type!: string;
 
   @Property({ type: "bigint" })
   positionX = 0;
@@ -17,13 +20,4 @@ export class User extends Base {
 
   @Property({ type: "bigint" })
   positionZ = 0;
-
-  @Property()
-  velocityX = 0;
-
-  @Property()
-  velocityY = 0;
-
-  @Property()
-  velocityZ = 0;
 }
