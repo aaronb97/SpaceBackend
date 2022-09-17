@@ -1,13 +1,29 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, Property } from "@mikro-orm/core";
+import { Base } from "./Base";
 
 @Entity()
-export class User {
-  @PrimaryKey()
-  id!: number;
+export class User extends Base {
+  @Property()
+  uid!: string;
 
   @Property()
-  createdAt = new Date();
+  username!: string;
 
-  @Property({ onUpdate: () => new Date() })
-  updatedAt = new Date();
+  @Property()
+  positionX = 0;
+
+  @Property()
+  positionY = 0;
+
+  @Property()
+  positionZ = 0;
+
+  @Property()
+  velocityX = 0;
+
+  @Property()
+  velocityY = 0;
+
+  @Property()
+  velocityZ = 0;
 }

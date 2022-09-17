@@ -2,50 +2,122 @@
   "data": {
     "propertyOrder": {},
     "properties": {
-      "id": {
-        "name": "id",
+      "uid": {
+        "name": "uid",
         "reference": "scalar",
-        "primary": true,
+        "getter": false,
+        "setter": false,
+        "type": "string"
+      },
+      "username": {
+        "name": "username",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "string"
+      },
+      "positionX": {
+        "name": "positionX",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
         "type": "number"
       },
-      "createdAt": {
-        "name": "createdAt",
+      "positionY": {
+        "name": "positionY",
         "reference": "scalar",
         "getter": false,
         "setter": false,
-        "type": "Date"
+        "type": "number"
       },
-      "updatedAt": {
-        "name": "updatedAt",
+      "positionZ": {
+        "name": "positionZ",
         "reference": "scalar",
         "getter": false,
         "setter": false,
-        "type": "Date"
+        "type": "number"
+      },
+      "velocityX": {
+        "name": "velocityX",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "number"
+      },
+      "velocityY": {
+        "name": "velocityY",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "number"
+      },
+      "velocityZ": {
+        "name": "velocityZ",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "number"
       }
     },
     "props": [
       {
-        "name": "id",
+        "name": "uid",
         "reference": "scalar",
-        "primary": true,
+        "getter": false,
+        "setter": false,
+        "type": "string"
+      },
+      {
+        "name": "username",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "string"
+      },
+      {
+        "name": "positionX",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
         "type": "number"
       },
       {
-        "name": "createdAt",
+        "name": "positionY",
         "reference": "scalar",
         "getter": false,
         "setter": false,
-        "type": "Date"
+        "type": "number"
       },
       {
-        "name": "updatedAt",
+        "name": "positionZ",
         "reference": "scalar",
         "getter": false,
         "setter": false,
-        "type": "Date"
+        "type": "number"
+      },
+      {
+        "name": "velocityX",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "number"
+      },
+      {
+        "name": "velocityY",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "number"
+      },
+      {
+        "name": "velocityZ",
+        "reference": "scalar",
+        "getter": false,
+        "setter": false,
+        "type": "number"
       }
     ],
-    "primaryKeys": ["id"],
+    "primaryKeys": [],
     "filters": {},
     "hooks": {},
     "indexes": [],
@@ -58,12 +130,12 @@
     "abstract": false,
     "constructorParams": [],
     "toJsonParams": [],
+    "extends": "Base",
     "useCache": true,
-    "compositePK": false,
     "relations": [],
     "collection": "user"
   },
   "origin": "./src/entities/User.ts",
-  "hash": "eecd6db041e2ddd341a86bb31ed24856",
+  "hash": "d14b5100815a3601cbf552717f4021a9",
   "version": "5.4.2"
 }
