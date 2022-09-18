@@ -36,21 +36,28 @@ const main = async () => {
 
       const fork = orm.em.fork();
 
-      const user = await fork.findOne(User, { uid: token.uid });
+      const user = await fork.findOne(
+        User,
+        { uid: token.uid },
+        { populate: ["planet"] }
+      );
       if (!user) {
-        const user = new User(token.uid, `Random ${Math.random()}`);
+        const earth = await fork.findOneOrFail(Planet, { name: "Earth" });
+        const user = new User(token.uid, `Random ${Math.random()}`, earth);
         await fork.persistAndFlush(user);
 
+        console.log("Successuly created user");
         res.status(201);
         res.json({ user });
       } else {
+        console.log("Successuly fetched user info");
         res.status(200);
         res.json({ user });
       }
     } catch (e) {
       console.error(e);
       res.status(400);
-      res.json("Invalid token");
+      res.json("An error occured");
     }
   });
 

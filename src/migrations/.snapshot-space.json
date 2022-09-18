@@ -137,6 +137,15 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "planet_id": {
+          "name": "planet_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "uid": {
           "name": "uid",
           "type": "varchar(255)",
@@ -233,7 +242,20 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {}
+      "foreignKeys": {
+        "user_planet_id_foreign": {
+          "constraintName": "user_planet_id_foreign",
+          "columnNames": [
+            "planet_id"
+          ],
+          "localTableName": "public.user",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.planet",
+          "updateRule": "cascade"
+        }
+      }
     }
   ]
 }

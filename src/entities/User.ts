@@ -1,14 +1,19 @@
-import { Entity, Property, Unique } from "@mikro-orm/core";
+import { Entity, ManyToOne, Property, Unique } from "@mikro-orm/core";
 import { Base } from "./Base";
+import { Planet } from "./Planet";
 
 @Entity()
 export class User extends Base {
-  constructor(uid: string, username: string) {
+  constructor(uid: string, username: string, planet: Planet) {
     super();
 
     this.uid = uid;
     this.username = username;
+    this.planet = planet;
   }
+
+  @ManyToOne()
+  planet: Planet;
 
   @Property({ hidden: true })
   uid: string;
