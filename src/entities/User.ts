@@ -10,7 +10,7 @@ export class User extends Base {
     this.username = username;
   }
 
-  @Property()
+  @Property({ hidden: true })
   uid: string;
 
   @Unique()
