@@ -214,6 +214,15 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "username"
+          ],
+          "composite": false,
+          "keyName": "user_username_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "user_pkey",
           "columnNames": [
             "id"
