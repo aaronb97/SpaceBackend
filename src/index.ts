@@ -1,38 +1,18 @@
 import { MikroORM } from "@mikro-orm/core";
 import mikroOrmConfig from "./mikro-orm.config";
-import { applicationDefault } from "firebase-admin/app";
-import admin from "firebase-admin";
 import { app } from "./express";
 import { pool } from "./pool";
 import { User } from "./entities/User";
 import { Planet } from "./entities/Planet";
-
-const firebaseApp = admin.initializeApp({
-  credential: applicationDefault(),
-});
+import { validateUser } from "./validateUser";
 
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
   await orm.getMigrator().up();
 
   app.post("/login", async (req, res) => {
-    const { authorization } = req.headers;
-    if (!authorization) {
-      res.status(400);
-      res.json("Must specifiy auth token");
-      return;
-    }
-
-    if (!authorization.startsWith("Bearer ")) {
-      res.status(400);
-      res.json("Invalid token");
-      return;
-    }
-
     try {
-      const token = await firebaseApp
-        .auth()
-        .verifyIdToken(authorization.substring(7, authorization.length));
+      const token = await validateUser(req.headers.authorization);
 
       const fork = orm.em.fork();
 
