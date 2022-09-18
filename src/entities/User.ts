@@ -3,12 +3,19 @@ import { Base } from "./Base";
 
 @Entity()
 export class User extends Base {
+  constructor(uid: string, username: string) {
+    super();
+
+    this.uid = uid;
+    this.username = username;
+  }
+
   @Property()
-  uid!: string;
+  uid: string;
 
   @Unique()
   @Property()
-  username!: string;
+  username: string;
 
   @Property({ type: "bigint" })
   positionX = 0;

@@ -4,6 +4,7 @@ import { applicationDefault } from "firebase-admin/app";
 import admin from "firebase-admin";
 import { app } from "./express";
 import { pool } from "./pool";
+import { User } from "./entities/User";
 
 const firebaseApp = admin.initializeApp({
   credential: applicationDefault(),
@@ -32,8 +33,19 @@ const main = async () => {
         .auth()
         .verifyIdToken(authorization.substring(7, authorization.length));
 
-      res.status(200);
-      res.json("Successfully logged in");
+      const fork = orm.em.fork();
+
+      const user = await fork.findOne(User, { uid: token.uid });
+      if (!user) {
+        const user = new User(token.uid, `Random ${Math.random()}`);
+        await fork.persistAndFlush(user);
+
+        res.status(201);
+        res.json({ username: user.username });
+      } else {
+        res.status(200);
+        res.json({ username: user.username });
+      }
     } catch (e) {
       console.error(e);
       res.status(400);
