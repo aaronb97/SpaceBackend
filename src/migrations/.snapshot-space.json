@@ -94,6 +94,15 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "keyName": "planet_name_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
           "keyName": "planet_pkey",
           "columnNames": [
             "id"

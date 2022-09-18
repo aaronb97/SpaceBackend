@@ -11,7 +11,7 @@ export class Planet extends Base {
     this.type = type;
   }
 
-  @Property()
+  @Property({ unique: true })
   name!: string;
 
   @Property()
