@@ -5,6 +5,7 @@ import admin from "firebase-admin";
 import { app } from "./express";
 import { pool } from "./pool";
 import { User } from "./entities/User";
+import { Planet } from "./entities/Planet";
 
 const firebaseApp = admin.initializeApp({
   credential: applicationDefault(),
@@ -41,10 +42,10 @@ const main = async () => {
         await fork.persistAndFlush(user);
 
         res.status(201);
-        res.json({ username: user.username });
+        res.json({ user });
       } else {
         res.status(200);
-        res.json({ username: user.username });
+        res.json({ user });
       }
     } catch (e) {
       console.error(e);
@@ -54,22 +55,21 @@ const main = async () => {
   });
 
   app.get("/planets", async (req, res) => {
-    const result = await pool.query("SELECT * from planets");
+    const results = await orm.em.fork().find(Planet, {});
 
-    res.json(result.rows);
+    res.json(results);
   });
 
   app.get("/planets/:id", async (req, res) => {
     try {
-      const result = await pool.query(
-        "SELECT * from planets WHERE planet_id = $1",
-        [req.params.id]
-      );
+      const result = await orm.em
+        .fork()
+        .findOneOrFail(Planet, { id: Number(req.params.id) });
 
-      res.json(result.rows);
-    } catch (e) {
-      console.log(e);
-      res.status(500);
+      res.json(result);
+    } catch {
+      res.status(404);
+      res.json("Planet not found");
     }
   });
 
