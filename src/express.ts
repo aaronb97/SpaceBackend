@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 
 const app = express();
-app.use(cors({ origin: "http://localhost:1234" }));
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
