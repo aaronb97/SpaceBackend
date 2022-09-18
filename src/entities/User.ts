@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, Property, Unique } from "@mikro-orm/core";
+import { Entity, Enum, ManyToOne, Property, Unique } from "@mikro-orm/core";
 import { Base } from "./Base";
 import { Planet } from "./Planet";
 
@@ -39,4 +39,15 @@ export class User extends Base {
 
   @Property()
   velocityZ = 0;
+
+  @Property({ nullable: true })
+  nextBoost!: Date;
+
+  @Enum(() => UserStatus)
+  status: UserStatus = UserStatus.LANDED;
+}
+
+export enum UserStatus {
+  TRAVELING,
+  LANDED,
 }

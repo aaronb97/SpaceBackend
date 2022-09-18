@@ -217,6 +217,25 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "next_boost": {
+          "name": "next_boost",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "status": {
+          "name": "status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
         }
       },
       "name": "user",
