@@ -1,10 +1,22 @@
-import { MikroORM } from "@mikro-orm/core";
+import {
+  Connection,
+  EntityManager,
+  IDatabaseDriver,
+  MikroORM,
+} from "@mikro-orm/core";
 import mikroOrmConfig from "./mikro-orm.config";
 import { app } from "./express";
 import { pool } from "./pool";
-import { User } from "./entities/User";
+import { User, UserStatus } from "./entities/User";
 import { Planet } from "./entities/Planet";
 import { validateUser } from "./validateUser";
+
+const getUser = async (
+  orm: EntityManager<IDatabaseDriver<Connection>>,
+  uid: string
+) => {
+  return orm.findOneOrFail(User, { uid: uid }, { populate: ["planet"] });
+};
 
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
@@ -28,11 +40,11 @@ const main = async () => {
 
         console.log("Successuly created user");
         res.status(201);
-        res.json({ user });
+        res.json(user);
       } else {
         console.log("Successuly fetched user info");
         res.status(200);
-        res.json({ user });
+        res.json(user);
       }
     } catch (e) {
       console.error(e);
@@ -60,27 +72,66 @@ const main = async () => {
     }
   });
 
-  app.post("/users/:id/speedboost", async (req, res) => {
+  app.post("/speedboost", async (req, res) => {
     try {
-      const user = await pool.query(
-        "SELECT * from users WHERE user_id = $1 AND last_boost < current_timestamp - interval '12 hour'",
-        [req.params.id]
-      );
+      const token = await validateUser(req.headers.authorization);
 
-      if (!user.rowCount) {
-        res.json("User did not recieve speed boost");
+      const fork = orm.em.fork();
+
+      const user = await getUser(fork, token.uid);
+
+      if (user.status !== UserStatus.TRAVELING) {
+        res.status(400);
+        res.json("User is not traveling");
         return;
       }
 
-      await pool.query(
-        "UPDATE users SET last_boost = current_timestamp WHERE user_id = $1",
-        [req.params.id]
-      );
-      res.status(200);
-      res.json("User recieved speed boost");
+      const time = new Date();
+
+      if (user.nextBoost.getTime() <= time.getTime()) {
+        user.updateNextBoost();
+        user.speedBoost();
+
+        await fork.persistAndFlush(user);
+
+        res.status(200);
+        res.json(await getUser(fork, token.uid));
+      } else {
+        res.status(400);
+        res.json("User can not recieve speed boost yet");
+        return;
+      }
+    } catch (e) {}
+  });
+
+  app.post("/travelingTo/:id", async (req, res) => {
+    try {
+      const token = await validateUser(req.headers.authorization);
+
+      const fork = orm.em.fork();
+
+      const user = await getUser(fork, token.uid);
+
+      const planet = await fork.findOneOrFail(Planet, {
+        id: Number(req.params.id),
+      });
+
+      if (planet.id === user.planet.id) {
+        res.status(400);
+        res.json("User is already traveling to planet with id" + req.params.id);
+        return;
+      }
+
+      user.planet = planet;
+      user.status = UserStatus.TRAVELING;
+      user.updateNextBoost();
+
+      await fork.persistAndFlush(user);
+      res.json(await getUser(fork, token.uid));
     } catch (e) {
-      console.log(e);
-      res.status(500);
+      console.error(e);
+      res.status(400);
+      res.json("An error occurred");
     }
   });
 };

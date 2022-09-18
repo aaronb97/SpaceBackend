@@ -45,6 +45,17 @@ export class User extends Base {
 
   @Enum(() => UserStatus)
   status: UserStatus = UserStatus.LANDED;
+
+  public speedBoost(speedBoostFactor = 2) {
+    this.velocityX *= speedBoostFactor;
+    this.velocityY *= speedBoostFactor;
+    this.velocityZ *= speedBoostFactor;
+  }
+
+  public updateNextBoost() {
+    const time = new Date();
+    this.nextBoost = new Date(time.getTime() + 8 * 60 * 60 * 1000);
+  }
 }
 
 export enum UserStatus {
