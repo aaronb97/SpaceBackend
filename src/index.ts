@@ -1,6 +1,7 @@
 import {
   Connection,
   EntityManager,
+  ForeignKeyConstraintViolationException,
   IDatabaseDriver,
   MikroORM,
 } from "@mikro-orm/core";
@@ -10,6 +11,7 @@ import { pool } from "./pool";
 import { User, UserStatus } from "./entities/User";
 import { Planet } from "./entities/Planet";
 import { validateUser } from "./validateUser";
+import { planets } from "./planets";
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -18,9 +20,32 @@ const getUser = async (
   return orm.findOneOrFail(User, { uid: uid }, { populate: ["planet"] });
 };
 
+const setupPlanets = async (
+  orm: EntityManager<IDatabaseDriver<Connection>>
+) => {
+  for (const planet of planets) {
+    const [attr, options] = planet;
+    const [name, x, y, z] = attr;
+
+    const entity =
+      (await orm.findOne(Planet, { name })) ??
+      new Planet(name, 0, options?.type ?? "planet");
+
+    entity.positionX = x;
+    entity.positionY = y;
+    entity.positionZ = z;
+
+    orm.persist(entity);
+  }
+
+  orm.flush();
+};
+
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
   await orm.getMigrator().up();
+
+  await setupPlanets(orm.em.fork());
 
   app.post("/login", async (req, res) => {
     try {

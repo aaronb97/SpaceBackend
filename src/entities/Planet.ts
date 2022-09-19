@@ -1,9 +1,11 @@
 import { Entity, Property } from "@mikro-orm/core";
 import { Base } from "./Base";
 
+export type PlanetType = "planet" | "moon" | "star";
+
 @Entity()
 export class Planet extends Base {
-  constructor(name: string, radius: number, type: string) {
+  constructor(name: string, radius: number, type: PlanetType) {
     super();
 
     this.name = name;
@@ -18,7 +20,7 @@ export class Planet extends Base {
   radius!: number;
 
   @Property()
-  type!: string;
+  type!: PlanetType;
 
   @Property({ type: "bigint" })
   positionX = 0;
