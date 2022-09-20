@@ -173,59 +173,72 @@
           "nullable": false,
           "mappedType": "string"
         },
-        "position_x": {
-          "name": "position_x",
-          "type": "bigint",
+        "base_speed": {
+          "name": "base_speed",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "default": "50000",
+          "mappedType": "double"
+        },
+        "position_x": {
+          "name": "position_x",
+          "type": "double precision",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "double"
         },
         "position_y": {
           "name": "position_y",
-          "type": "bigint",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "double"
         },
         "position_z": {
           "name": "position_z",
-          "type": "bigint",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "double"
         },
         "velocity_x": {
           "name": "velocity_x",
-          "type": "int",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "integer"
+          "default": "0",
+          "mappedType": "double"
         },
         "velocity_y": {
           "name": "velocity_y",
-          "type": "int",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "integer"
+          "default": "0",
+          "mappedType": "double"
         },
         "velocity_z": {
           "name": "velocity_z",
-          "type": "int",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "integer"
+          "default": "0",
+          "mappedType": "double"
         },
         "next_boost": {
           "name": "next_boost",
@@ -250,6 +263,15 @@
       "name": "user",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "uid"
+          ],
+          "composite": false,
+          "keyName": "user_uid_unique",
+          "primary": false,
+          "unique": true
+        },
         {
           "columnNames": [
             "username"

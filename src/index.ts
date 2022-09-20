@@ -45,13 +45,15 @@ const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
   await orm.getMigrator().up();
 
+  const loginFork = orm.em.fork();
+
   await setupPlanets(orm.em.fork());
 
   app.post("/login", async (req, res) => {
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const fork = orm.em.fork();
+      const fork = loginFork;
 
       const user = await fork.findOne(
         User,
@@ -67,7 +69,9 @@ const main = async () => {
         res.status(201);
         res.json(user);
       } else {
-        console.log("Successuly fetched user info");
+        user.updatePositions();
+        await fork.persistAndFlush(user);
+
         res.status(200);
         res.json(user);
       }
@@ -147,9 +151,9 @@ const main = async () => {
         return;
       }
 
-      user.planet = planet;
-      user.status = UserStatus.TRAVELING;
+      user.updatePositions();
       user.updateNextBoost();
+      user.startTraveling(planet);
 
       await fork.persistAndFlush(user);
       res.json(await getUser(fork, token.uid));
