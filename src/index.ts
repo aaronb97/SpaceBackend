@@ -101,11 +101,13 @@ const main = async () => {
     }
   });
 
+  const speedBoostFork = orm.em.fork();
+
   app.post("/speedboost", async (req, res) => {
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const fork = orm.em.fork();
+      const fork = speedBoostFork;
 
       const user = await getUser(fork, token.uid);
 
