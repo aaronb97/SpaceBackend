@@ -46,6 +46,11 @@ export class User extends Base {
   @Property({ nullable: true })
   nextBoost!: Date;
 
+  @Property({ persist: false })
+  get serverTime() {
+    return new Date();
+  }
+
   @Enum(() => UserStatus)
   status: UserStatus = UserStatus.LANDED;
 
