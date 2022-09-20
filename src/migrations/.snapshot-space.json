@@ -64,30 +64,30 @@
         },
         "position_x": {
           "name": "position_x",
-          "type": "bigint",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "double"
         },
         "position_y": {
           "name": "position_y",
-          "type": "bigint",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "double"
         },
         "position_z": {
           "name": "position_z",
-          "type": "bigint",
+          "type": "double precision",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "double"
         }
       },
       "name": "planet",
@@ -183,6 +183,16 @@
           "default": "50000",
           "mappedType": "double"
         },
+        "speed": {
+          "name": "speed",
+          "type": "double precision",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "50000",
+          "mappedType": "double"
+        },
         "position_x": {
           "name": "position_x",
           "type": "double precision",
@@ -242,6 +252,16 @@
         },
         "next_boost": {
           "name": "next_boost",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "landing_time": {
+          "name": "landing_time",
           "type": "timestamptz(0)",
           "unsigned": false,
           "autoincrement": false,

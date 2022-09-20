@@ -22,12 +22,12 @@ export class Planet extends Base {
   @Property()
   type!: PlanetType;
 
-  @Property({ type: "bigint" })
+  @Property({ type: "float8" })
   positionX = 0;
 
-  @Property({ type: "bigint" })
+  @Property({ type: "float8" })
   positionY = 0;
 
-  @Property({ type: "bigint" })
+  @Property({ type: "float8" })
   positionZ = 0;
 }

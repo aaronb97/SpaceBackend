@@ -2,6 +2,8 @@ import { Entity, Enum, ManyToOne, Property, Unique } from "@mikro-orm/core";
 import { Base } from "./Base";
 import { Planet } from "./Planet";
 
+const square = (num: number) => Math.pow(num, 2);
+
 @Entity()
 export class User extends Base {
   constructor(uid: string, username: string, planet: Planet) {
@@ -22,8 +24,14 @@ export class User extends Base {
   @Property()
   username: string;
 
+  /**
+   * Speed in km / hour
+   */
   @Property({ default: 50000, type: "float8" })
   baseSpeed = 50000;
+
+  @Property({ default: 50000, type: "float8" })
+  speed = 50000;
 
   @Property({ type: "float8" })
   positionX = 0;
@@ -44,7 +52,10 @@ export class User extends Base {
   velocityZ = 0;
 
   @Property({ nullable: true })
-  nextBoost!: Date;
+  nextBoost?: Date;
+
+  @Property({ nullable: true })
+  landingTime?: Date;
 
   @Property({ persist: false })
   get serverTime() {
@@ -59,6 +70,21 @@ export class User extends Base {
    */
   public updatePositions() {
     const time = new Date();
+
+    if (this.status === UserStatus.TRAVELING && time > this.landingTime!) {
+      this.nextBoost = undefined;
+      this.landingTime = undefined;
+      this.status = UserStatus.LANDED;
+      this.positionX = this.planet.positionX;
+      this.positionY = this.planet.positionY;
+      this.positionZ = this.planet.positionZ;
+      this.speed = 0;
+      this.velocityX = 0;
+      this.velocityY = 0;
+      this.velocityZ = 0;
+      return;
+    }
+
     const last = this.updatedAt;
 
     const elapsed = time.getTime() - last.getTime();
@@ -72,17 +98,35 @@ export class User extends Base {
     this.positionZ += this.velocityZ * km;
   }
 
+  public setLandingTime() {
+    const [x1, y1, z1] = [this.positionX, this.positionY, this.positionZ];
+    const [x2, y2, z2] = [
+      this.planet.positionX,
+      this.planet.positionY,
+      this.planet.positionZ,
+    ];
+
+    const distance = Math.sqrt(
+      square(x2 - x1) + (square(y2 - y1) + square(z2 - z1))
+    );
+
+    const time = (distance / this.speed) * 60 * 60 * 1000;
+
+    this.landingTime = new Date(new Date().getTime() + time);
+  }
+
   public startTraveling(planet: Planet) {
     this.planet = planet;
+    this.speed = this.baseSpeed;
     this.status = UserStatus.TRAVELING;
+
+    this.setLandingTime();
 
     const vector = [
       planet.positionX - this.positionX,
       planet.positionY - this.positionY,
       planet.positionZ - this.positionZ,
     ] as const;
-
-    const square = (num: number) => Math.pow(num, 2);
 
     const magnitude = Math.sqrt(
       square(vector[0]) + square(vector[1]) + square(vector[2])

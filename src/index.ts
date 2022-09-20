@@ -63,17 +63,20 @@ const main = async () => {
       if (!user) {
         const earth = await fork.findOneOrFail(Planet, { name: "Earth" });
         const user = new User(token.uid, `Random ${Math.random()}`, earth);
+        user.positionX = earth.positionX;
+        user.positionY = earth.positionY;
+        user.positionZ = earth.positionZ;
         await fork.persistAndFlush(user);
 
         console.log("Successuly created user");
         res.status(201);
-        res.json(user);
+        res.json(await getUser(fork, token.uid));
       } else {
         user.updatePositions();
         await fork.persistAndFlush(user);
 
         res.status(200);
-        res.json(user);
+        res.json(await getUser(fork, token.uid));
       }
     } catch (e) {
       console.error(e);
@@ -111,7 +114,7 @@ const main = async () => {
 
       const user = await getUser(fork, token.uid);
 
-      if (user.status !== UserStatus.TRAVELING) {
+      if (user.status !== UserStatus.TRAVELING || !user.nextBoost) {
         res.status(400);
         res.json("User is not traveling");
         return;
