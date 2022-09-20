@@ -144,6 +144,7 @@ export class User extends Base {
   }
 
   public speedBoost(speedBoostFactor = 2) {
+    this.speed *= speedBoostFactor;
     this.velocityX *= speedBoostFactor;
     this.velocityY *= speedBoostFactor;
     this.velocityZ *= speedBoostFactor;

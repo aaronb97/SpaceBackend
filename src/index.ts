@@ -123,8 +123,9 @@ const main = async () => {
       const time = new Date();
 
       if (user.nextBoost.getTime() <= time.getTime()) {
-        user.updateNextBoost();
         user.speedBoost();
+        user.setLandingTime();
+        user.updateNextBoost();
 
         await fork.persistAndFlush(user);
 
