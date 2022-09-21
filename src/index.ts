@@ -1,13 +1,11 @@
 import {
   Connection,
   EntityManager,
-  ForeignKeyConstraintViolationException,
   IDatabaseDriver,
   MikroORM,
 } from "@mikro-orm/core";
 import mikroOrmConfig from "./mikro-orm.config";
 import { app } from "./express";
-import { pool } from "./pool";
 import { User, UserStatus } from "./entities/User";
 import { Planet } from "./entities/Planet";
 import { validateUser } from "./validateUser";
