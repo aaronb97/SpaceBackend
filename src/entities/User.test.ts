@@ -42,3 +42,60 @@ describe("updateNextBoost", () => {
     );
   });
 });
+
+describe("setLandingTime", () => {
+  const systemTime = new Date(2020, 1, 1);
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(systemTime);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  const planet = new Planet("test planet", 0, "planet");
+  planet.positionX = 50000;
+  planet.positionY = 40000;
+  planet.positionZ = 30000;
+
+  const user = new User("random", "random", planet);
+  user.positionX = -30000;
+  user.positionY = -20000;
+  user.positionZ = -10000;
+
+  it("should calculate the correct landing time", () => {
+    user.setLandingTime();
+    expect(user.landingTime!.getTime() - systemTime.getTime()).toBe(7754637);
+  });
+});
+
+describe("startTraveling", () => {
+  const systemTime = new Date(2020, 1, 1);
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(systemTime);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  const planet = new Planet("test planet", 0, "planet");
+  planet.positionX = 50000;
+  planet.positionY = 40000;
+  planet.positionZ = 30000;
+
+  const user = new User("random", "random", planet);
+  user.positionX = 0;
+  user.positionY = 0;
+  user.positionZ = 0;
+
+  it("should calculate the correct velocities", () => {
+    user.startTraveling(planet);
+
+    expect(user.velocityX).toBe(35355.33905932737);
+    expect(user.velocityY).toBe(28284.2712474619);
+    expect(user.velocityZ).toBe(21213.203435596424);
+  });
+});
