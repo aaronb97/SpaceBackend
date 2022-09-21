@@ -1,6 +1,6 @@
-import { Entity, Enum, ManyToOne, Property, Unique } from "@mikro-orm/core";
-import { Base } from "./Base";
-import { Planet } from "./Planet";
+import { Entity, Enum, ManyToOne, Property, Unique } from '@mikro-orm/core';
+import { Base } from './Base';
+import { Planet } from './Planet';
 
 const square = (num: number) => Math.pow(num, 2);
 
@@ -27,28 +27,28 @@ export class User extends Base {
   /**
    * Speed in km / hour
    */
-  @Property({ default: 50000, type: "float8" })
+  @Property({ default: 50000, type: 'float8' })
   baseSpeed = 50000;
 
-  @Property({ default: 50000, type: "float8" })
+  @Property({ default: 50000, type: 'float8' })
   speed = 50000;
 
-  @Property({ type: "float8" })
+  @Property({ type: 'float8' })
   positionX = 0;
 
-  @Property({ type: "float8" })
+  @Property({ type: 'float8' })
   positionY = 0;
 
-  @Property({ type: "float8" })
+  @Property({ type: 'float8' })
   positionZ = 0;
 
-  @Property({ type: "float8", default: 0 })
+  @Property({ type: 'float8', default: 0 })
   velocityX = 0;
 
-  @Property({ type: "float8", default: 0 })
+  @Property({ type: 'float8', default: 0 })
   velocityY = 0;
 
-  @Property({ type: "float8", default: 0 })
+  @Property({ type: 'float8', default: 0 })
   velocityZ = 0;
 
   @Property({ nullable: true })
@@ -91,7 +91,7 @@ export class User extends Base {
 
     const km = elapsed / 1000 / 60 / 60;
 
-    console.log("Elapsed time", elapsed);
+    console.log('Elapsed time', elapsed);
 
     this.positionX += this.velocityX * km;
     this.positionY += this.velocityY * km;
@@ -107,7 +107,7 @@ export class User extends Base {
     ];
 
     const distance = Math.sqrt(
-      square(x2 - x1) + (square(y2 - y1) + square(z2 - z1))
+      square(x2 - x1) + (square(y2 - y1) + square(z2 - z1)),
     );
 
     const time = (distance / this.speed) * 60 * 60 * 1000;
@@ -129,7 +129,7 @@ export class User extends Base {
     ] as const;
 
     const magnitude = Math.sqrt(
-      square(vector[0]) + square(vector[1]) + square(vector[2])
+      square(vector[0]) + square(vector[1]) + square(vector[2]),
     );
 
     const unitVector = [

@@ -1,9 +1,9 @@
-import { EntityManager, IDatabaseDriver, Connection } from "@mikro-orm/core";
-import { Planet } from "./entities/Planet";
-import { planets } from "./planets";
+import { EntityManager, IDatabaseDriver, Connection } from '@mikro-orm/core';
+import { Planet } from './entities/Planet';
+import { planets } from './planets';
 
 export const setupPlanets = async (
-  orm: EntityManager<IDatabaseDriver<Connection>>
+  orm: EntityManager<IDatabaseDriver<Connection>>,
 ) => {
   for (const planet of planets) {
     const [attr, options] = planet;
@@ -11,7 +11,7 @@ export const setupPlanets = async (
 
     const entity =
       (await orm.findOne(Planet, { name })) ??
-      new Planet(name, 0, options?.type ?? "planet");
+      new Planet(name, 0, options?.type ?? 'planet');
 
     entity.positionX = x;
     entity.positionY = y;
@@ -20,5 +20,5 @@ export const setupPlanets = async (
     orm.persist(entity);
   }
 
-  orm.flush();
+  await orm.flush();
 };

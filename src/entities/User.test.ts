@@ -1,15 +1,15 @@
-import { Planet } from "./Planet";
-import { User } from "./User";
+import { Planet } from './Planet';
+import { User } from './User';
 
-describe("speedBoost", () => {
-  it("should double speed and velocities", () => {
-    const planet = new Planet("test planet", 0, "planet");
+describe('speedBoost', () => {
+  it('should double speed and velocities', () => {
+    const planet = new Planet('test planet', 0, 'planet');
     planet.positionX = 100;
     planet.positionY = 0;
     planet.positionZ = 0;
 
-    //default speed of 50000
-    const user = new User("random", "random", planet);
+    // default speed of 50000
+    const user = new User('random', 'random', planet);
 
     user.startTraveling(planet);
 
@@ -20,7 +20,7 @@ describe("speedBoost", () => {
   });
 });
 
-describe("updateNextBoost", () => {
+describe('updateNextBoost', () => {
   const systemTime = new Date(2020, 1, 1);
   beforeAll(() => {
     jest.useFakeTimers();
@@ -31,19 +31,19 @@ describe("updateNextBoost", () => {
     jest.useRealTimers();
   });
 
-  it("should set the next boost to be 8 hours from the current time", () => {
-    const planet = new Planet("test planet", 0, "planet");
-    const user = new User("random", "random", planet);
+  it('should set the next boost to be 8 hours from the current time', () => {
+    const planet = new Planet('test planet', 0, 'planet');
+    const user = new User('random', 'random', planet);
 
     user.updateNextBoost();
 
     expect(user.nextBoost!.getTime() - systemTime.getTime()).toBe(
-      60 * 60 * 1000 * 8
+      60 * 60 * 1000 * 8,
     );
   });
 });
 
-describe("setLandingTime", () => {
+describe('setLandingTime', () => {
   const systemTime = new Date(2020, 1, 1);
   beforeAll(() => {
     jest.useFakeTimers();
@@ -54,23 +54,23 @@ describe("setLandingTime", () => {
     jest.useRealTimers();
   });
 
-  const planet = new Planet("test planet", 0, "planet");
+  const planet = new Planet('test planet', 0, 'planet');
   planet.positionX = 50000;
   planet.positionY = 40000;
   planet.positionZ = 30000;
 
-  const user = new User("random", "random", planet);
+  const user = new User('random', 'random', planet);
   user.positionX = -30000;
   user.positionY = -20000;
   user.positionZ = -10000;
 
-  it("should calculate the correct landing time", () => {
+  it('should calculate the correct landing time', () => {
     user.setLandingTime();
     expect(user.landingTime!.getTime() - systemTime.getTime()).toBe(7754637);
   });
 });
 
-describe("startTraveling", () => {
+describe('startTraveling', () => {
   const systemTime = new Date(2020, 1, 1);
   beforeAll(() => {
     jest.useFakeTimers();
@@ -81,17 +81,17 @@ describe("startTraveling", () => {
     jest.useRealTimers();
   });
 
-  const planet = new Planet("test planet", 0, "planet");
+  const planet = new Planet('test planet', 0, 'planet');
   planet.positionX = 50000;
   planet.positionY = 40000;
   planet.positionZ = 30000;
 
-  const user = new User("random", "random", planet);
+  const user = new User('random', 'random', planet);
   user.positionX = 0;
   user.positionY = 0;
   user.positionZ = 0;
 
-  it("should calculate the correct velocities", () => {
+  it('should calculate the correct velocities', () => {
     user.startTraveling(planet);
 
     expect(user.velocityX).toBe(35355.33905932737);
@@ -100,7 +100,7 @@ describe("startTraveling", () => {
   });
 });
 
-describe("updatePositions", () => {
+describe('updatePositions', () => {
   const systemTime = new Date(2020, 1, 1);
   beforeAll(() => {
     jest.useFakeTimers();
@@ -112,12 +112,12 @@ describe("updatePositions", () => {
   });
 
   const setup = () => {
-    const planet = new Planet("test planet", 0, "planet");
+    const planet = new Planet('test planet', 0, 'planet');
     planet.positionX = 900000;
     planet.positionY = 0;
     planet.positionZ = 0;
 
-    const user = new User("random", "random", planet);
+    const user = new User('random', 'random', planet);
     user.positionX = 0;
     user.positionY = 0;
     user.positionZ = 0;
@@ -125,7 +125,7 @@ describe("updatePositions", () => {
     return { user, planet };
   };
 
-  it("should properly calculate positions after time has passed", () => {
+  it('should properly calculate positions after time has passed', () => {
     const { user, planet } = setup();
 
     user.startTraveling(planet);
@@ -137,7 +137,7 @@ describe("updatePositions", () => {
     expect(user.positionX).toBe(500);
   });
 
-  it("should set the position to be the same as the planet if enough time has passed", () => {
+  it('should set the position to be the same as the planet if enough time has passed', () => {
     const { user, planet } = setup();
 
     user.startTraveling(planet);
