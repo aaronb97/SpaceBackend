@@ -99,3 +99,53 @@ describe("startTraveling", () => {
     expect(user.velocityZ).toBe(21213.203435596424);
   });
 });
+
+describe("updatePositions", () => {
+  const systemTime = new Date(2020, 1, 1);
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(systemTime);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  const setup = () => {
+    const planet = new Planet("test planet", 0, "planet");
+    planet.positionX = 900000;
+    planet.positionY = 0;
+    planet.positionZ = 0;
+
+    const user = new User("random", "random", planet);
+    user.positionX = 0;
+    user.positionY = 0;
+    user.positionZ = 0;
+
+    return { user, planet };
+  };
+
+  it("should properly calculate positions after time has passed", () => {
+    const { user, planet } = setup();
+
+    user.startTraveling(planet);
+
+    jest.advanceTimersByTime(36000);
+
+    user.updatePositions();
+
+    expect(user.positionX).toBe(500);
+  });
+
+  it("should set the position to be the same as the planet if enough time has passed", () => {
+    const { user, planet } = setup();
+
+    user.startTraveling(planet);
+
+    jest.advanceTimersByTime(900000000000);
+
+    user.updatePositions();
+
+    expect(user.positionX).toBe(planet.positionX);
+  });
+});
