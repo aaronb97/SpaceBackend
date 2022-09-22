@@ -22,8 +22,6 @@ export const defineRoutes = async (
   app: core.Express,
   orm: MikroORM<IDatabaseDriver<Connection>>,
 ) => {
-  await orm.getMigrator().up();
-
   const loginFork = orm.em.fork();
 
   await setupPlanets(orm.em.fork());

@@ -13,8 +13,7 @@ let orm: MikroORM<IDatabaseDriver<Connection>>;
 
 const initializeWebServer = async () => {
   expressApp = express();
-  orm = await MikroORM.init(mikroOrmConfig);
-  await defineRoutes(expressApp, orm);
+  orm = await MikroORM.init({ ...mikroOrmConfig, dbName: 'spaceTest' });
   connection = expressApp.listen();
 };
 
@@ -41,9 +40,14 @@ beforeAll(async () => {
   axiosClient = axios.create({
     baseURL: `http://127.0.0.1:${port}`,
   });
+
+  await orm.getMigrator().up();
+  await defineRoutes(expressApp, orm);
 });
 
 afterAll(async () => {
+  const generator = orm.getSchemaGenerator();
+  await generator.dropDatabase('spaceTest');
   await orm.close();
   await stopWebServer();
 });
