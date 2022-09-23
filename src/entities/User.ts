@@ -22,8 +22,8 @@ export class User extends Base {
   uid: string;
 
   @Unique()
-  @Property()
-  uuid: string = v4();
+  @Property({ onCreate: () => v4() })
+  uuid!: string;
 
   @Property()
   username: string;
