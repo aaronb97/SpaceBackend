@@ -88,10 +88,12 @@ export class User extends Base {
     const last = this.updatedAt;
 
     const elapsed = time.getTime() - last.getTime();
+    if (elapsed < 0) {
+      console.log(time, last);
+      throw new Error(`elapsed should not be less than 0: ${elapsed}`);
+    }
 
     const km = elapsed / 1000 / 60 / 60;
-
-    console.log('Elapsed time', elapsed);
 
     this.positionX += this.velocityX * km;
     this.positionY += this.velocityY * km;
