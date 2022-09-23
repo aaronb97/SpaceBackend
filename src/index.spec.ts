@@ -65,7 +65,7 @@ afterAll(async () => {
 });
 
 describe('/planets', () => {
-  test('it should fetch the planets', async () => {
+  it('should fetch the planets', async () => {
     const result = await axiosClient.get('/planets');
     const data = result.data;
 
@@ -81,7 +81,7 @@ const user1Config = {
 };
 
 describe('/login', () => {
-  test('it should create a new user when logging in with a new user', async () => {
+  it('should create a new user when logging in with a new user', async () => {
     const result = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result.data.planet.name).toBe('Earth');
@@ -103,7 +103,7 @@ describe('/travelingTo and positions', () => {
     jest.useRealTimers();
   });
 
-  test('it should update users positions after traveling somewhere and time has passed', async () => {
+  it('should update users positions after traveling somewhere and time has passed', async () => {
     const result = await axiosClient.post('/login', undefined, user1Config);
 
     await axiosClient.post('/travelingTo/2', undefined, user1Config);
@@ -117,7 +117,7 @@ describe('/travelingTo and positions', () => {
     expect(result.data.positionZ).not.toBe(result2.data.positionZ);
   });
 
-  test('it should return an error if the traveling id is invalid', async () => {
+  it('should return an error if the traveling id is invalid', async () => {
     await axiosClient.post('/login', undefined, user1Config);
 
     const result = await axiosClient.post(
@@ -129,7 +129,7 @@ describe('/travelingTo and positions', () => {
     expect(result.status).toBe(404);
   });
 
-  test('it should return an error if the user is already associated with that planet', async () => {
+  it('should return an error if the user is already associated with that planet', async () => {
     const user = await axiosClient.post('/login', undefined, user1Config);
 
     const result = await axiosClient.post(
