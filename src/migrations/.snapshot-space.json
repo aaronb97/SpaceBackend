@@ -164,6 +164,15 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "uuid": {
+          "name": "uuid",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        },
         "username": {
           "name": "username",
           "type": "varchar(255)",
@@ -294,10 +303,10 @@
         },
         {
           "columnNames": [
-            "username"
+            "uuid"
           ],
           "composite": false,
-          "keyName": "user_username_unique",
+          "keyName": "user_uuid_unique",
           "primary": false,
           "unique": true
         },

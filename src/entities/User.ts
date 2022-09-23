@@ -1,6 +1,7 @@
 import { Entity, Enum, ManyToOne, Property, Unique } from '@mikro-orm/core';
 import { Base } from './Base';
 import { Planet } from './Planet';
+import { v4 } from 'uuid';
 
 const square = (num: number) => Math.pow(num, 2);
 
@@ -21,6 +22,9 @@ export class User extends Base {
   uid: string;
 
   @Unique()
+  @Property()
+  uuid: string = v4();
+
   @Property()
   username: string;
 
