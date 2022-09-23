@@ -51,10 +51,10 @@ export class User extends Base {
   @Property({ type: 'float8', default: 0 })
   velocityZ = 0;
 
-  @Property({ nullable: true })
+  @Property({ nullable: true, length: 3 })
   nextBoost?: Date;
 
-  @Property({ nullable: true })
+  @Property({ nullable: true, length: 3 })
   landingTime?: Date;
 
   @Property({ persist: false })

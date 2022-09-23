@@ -7,6 +7,10 @@ export class Base {
   @Property({ hidden: true })
   createdAt = new Date();
 
-  @Property({ onUpdate: () => new Date(), hidden: true })
+  @Property({
+    onUpdate: () => new Date(),
+    hidden: true,
+    length: 3,
+  })
   updatedAt = new Date();
 }

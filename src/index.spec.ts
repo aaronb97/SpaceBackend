@@ -209,9 +209,11 @@ describe('/speedBoost', () => {
 
     jest.advanceTimersByTime(8 * 60 * 60 * 1000 + 1);
 
-    void axiosClient.post('/speedBoost', undefined, user1Config);
-    void axiosClient.post('/speedBoost', undefined, user1Config);
-    void axiosClient.post('/speedBoost', undefined, user1Config);
+    await Promise.all([
+      axiosClient.post('/speedBoost', undefined, user1Config),
+      axiosClient.post('/speedBoost', undefined, user1Config),
+      axiosClient.post('/speedBoost', undefined, user1Config),
+    ]);
 
     const result2 = await axiosClient.post('/login', undefined, user1Config);
 

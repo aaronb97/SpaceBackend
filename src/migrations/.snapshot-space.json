@@ -27,12 +27,12 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamptz(0)",
+          "type": "timestamptz(3)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 6,
+          "length": 3,
           "mappedType": "datetime"
         },
         "name": {
@@ -138,12 +138,12 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamptz(0)",
+          "type": "timestamptz(3)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 6,
+          "length": 3,
           "mappedType": "datetime"
         },
         "planet_id": {
@@ -252,22 +252,22 @@
         },
         "next_boost": {
           "name": "next_boost",
-          "type": "timestamptz(0)",
+          "type": "timestamptz(3)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 6,
+          "length": 3,
           "mappedType": "datetime"
         },
         "landing_time": {
           "name": "landing_time",
-          "type": "timestamptz(0)",
+          "type": "timestamptz(3)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 6,
+          "length": 3,
           "mappedType": "datetime"
         },
         "status": {

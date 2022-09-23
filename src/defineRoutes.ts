@@ -22,7 +22,7 @@ export const defineRoutes = async (
   app: core.Express,
   orm: MikroORM<IDatabaseDriver<Connection>>,
 ) => {
-  const loginFork = orm.em.fork();
+  const fork = orm.em.fork();
 
   await setupPlanets(orm.em.fork());
 
@@ -30,13 +30,12 @@ export const defineRoutes = async (
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const fork = loginFork;
-
       const user = await fork.findOne(
         User,
         { uid: token.uid },
         { populate: ['planet'] },
       );
+
       if (!user) {
         const earth = await fork.findOneOrFail(Planet, { name: 'Earth' });
         const user = new User(token.uid, `Random ${Math.random()}`, earth);
@@ -80,13 +79,9 @@ export const defineRoutes = async (
     }
   });
 
-  const speedBoostFork = orm.em.fork();
-
   app.post('/speedboost', async (req, res) => {
     try {
       const token = await validateUser(req.headers.authorization);
-
-      const fork = speedBoostFork;
 
       const user = await getUser(fork, token.uid);
 
@@ -117,8 +112,6 @@ export const defineRoutes = async (
   app.post('/travelingTo/:id', async (req, res) => {
     try {
       const token = await validateUser(req.headers.authorization);
-
-      const fork = orm.em.fork();
 
       const user = await getUser(fork, token.uid);
 
