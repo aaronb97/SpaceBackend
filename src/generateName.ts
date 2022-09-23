@@ -536,9 +536,3 @@ const adjectives = [
   'Zany',
   'Zealous',
 ];
-
-for (const adj of adjectives) {
-  if (adjectives.filter((x) => x === adj).length > 1) {
-    console.log('Duplicate', adj);
-  }
-}
