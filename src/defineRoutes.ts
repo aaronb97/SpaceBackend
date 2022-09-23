@@ -10,6 +10,8 @@ import { setupPlanets } from './setupPlanets';
 import { validateUser } from './validateUser';
 import * as core from 'express-serve-static-core';
 import { Planet } from './entities/Planet';
+import { generateName } from './generateName';
+import { Username } from './entities/Username';
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -38,10 +40,20 @@ export const defineRoutes = async (
 
       if (!user) {
         const earth = await fork.findOneOrFail(Planet, { name: 'Earth' });
-        const user = new User(token.uid, `Random ${Math.random()}`, earth);
+
+        const name = generateName();
+        let username = await fork.findOne(Username, { name });
+        if (!username) {
+          username = new Username(name);
+        }
+
+        const user = new User(token.uid, `${name}${username.count}`, earth);
         user.positionX = earth.positionX;
         user.positionY = earth.positionY;
         user.positionZ = earth.positionZ;
+
+        username.count++;
+        fork.persist(username);
         await fork.persistAndFlush(user);
 
         res.status(201);
