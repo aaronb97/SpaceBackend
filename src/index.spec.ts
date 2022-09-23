@@ -57,6 +57,10 @@ beforeAll(async () => {
   await defineRoutes(expressApp, orm);
 });
 
+afterEach(async () => {
+  await orm.em.nativeDelete('user', {});
+});
+
 afterAll(async () => {
   const generator = orm.getSchemaGenerator();
   await generator.dropDatabase('spaceTest');
@@ -96,6 +100,9 @@ describe('/login', () => {
 describe('/travelingTo and positions', () => {
   beforeAll(() => {
     jest.useFakeTimers();
+  });
+
+  beforeEach(() => {
     jest.setSystemTime(new Date(2020, 1, 1));
   });
 
@@ -139,6 +146,20 @@ describe('/travelingTo and positions', () => {
     );
 
     expect(result.status).toBe(400);
+  });
+
+  it('should update the users position to the planet if enough time has passed', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(1000000000000);
+
+    const user = await axiosClient.post('/login', undefined, user1Config);
+
+    expect(user.data.speed).toBe(0);
+    expect(user.data.positionX).toBe(user.data.planet.positionX);
+    expect(user.data.positionY).toBe(user.data.planet.positionY);
+    expect(user.data.positionZ).toBe(user.data.planet.positionZ);
   });
 });
 
