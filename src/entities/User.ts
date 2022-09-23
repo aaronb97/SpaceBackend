@@ -1,4 +1,12 @@
-import { Entity, Enum, ManyToOne, Property, Unique } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  Enum,
+  ManyToMany,
+  ManyToOne,
+  Property,
+  Unique,
+} from '@mikro-orm/core';
 import { Base } from './Base';
 import { Planet } from './Planet';
 import { v4 } from 'uuid';
@@ -17,6 +25,9 @@ export class User extends Base {
 
   @ManyToOne()
   planet: Planet;
+
+  @ManyToMany()
+  visitedPlanets = new Collection<Planet>(this);
 
   @Property({ hidden: true, unique: true })
   uid: string;
@@ -86,6 +97,7 @@ export class User extends Base {
       this.velocityX = 0;
       this.velocityY = 0;
       this.velocityZ = 0;
+      this.visitedPlanets.add(this.planet);
       return;
     }
 

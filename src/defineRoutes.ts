@@ -17,7 +17,11 @@ const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
   uid: string,
 ) => {
-  return await orm.findOneOrFail(User, { uid }, { populate: ['planet'] });
+  return await orm.findOneOrFail(
+    User,
+    { uid },
+    { populate: ['planet', 'visitedPlanets'] },
+  );
 };
 
 export const defineRoutes = async (
@@ -32,11 +36,7 @@ export const defineRoutes = async (
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const user = await fork.findOne(
-        User,
-        { uid: token.uid },
-        { populate: ['planet'] },
-      );
+      const user = await fork.findOne(User, { uid: token.uid });
 
       if (!user) {
         const earth = await fork.findOneOrFail(Planet, { name: 'Earth' });
@@ -46,6 +46,7 @@ export const defineRoutes = async (
           (await fork.findOne(Username, { name })) ?? new Username(name);
 
         const user = new User(token.uid, `${name}${username.count}`, earth);
+        user.visitedPlanets.add(earth);
         user.positionX = earth.positionX;
         user.positionY = earth.positionY;
         user.positionZ = earth.positionZ;

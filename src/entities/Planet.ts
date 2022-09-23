@@ -1,7 +1,8 @@
-import { Entity, Property } from "@mikro-orm/core";
-import { Base } from "./Base";
+import { Collection, Entity, ManyToMany, Property } from '@mikro-orm/core';
+import { Base } from './Base';
+import { User } from './User';
 
-export type PlanetType = "planet" | "moon" | "star";
+export type PlanetType = 'planet' | 'moon' | 'star';
 
 @Entity()
 export class Planet extends Base {
@@ -13,6 +14,9 @@ export class Planet extends Base {
     this.type = type;
   }
 
+  @ManyToMany(() => User, (user) => user.visitedPlanets)
+  visitedBy = new Collection<User>(this);
+
   @Property({ unique: true })
   name!: string;
 
@@ -22,12 +26,12 @@ export class Planet extends Base {
   @Property()
   type!: PlanetType;
 
-  @Property({ type: "float8" })
+  @Property({ type: 'float8' })
   positionX = 0;
 
-  @Property({ type: "float8" })
+  @Property({ type: 'float8' })
   positionY = 0;
 
-  @Property({ type: "float8" })
+  @Property({ type: 'float8' })
   positionZ = 0;
 }

@@ -8,6 +8,7 @@ import { MikroORM, IDatabaseDriver, Connection } from '@mikro-orm/core';
 import mikroOrmConfig from './mikro-orm.config';
 import { validateUser } from './validateUser';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import { Planet } from './entities/Planet';
 
 jest.mock('./validateUser');
 
@@ -89,6 +90,7 @@ describe('/login', () => {
     const result = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result.data.planet.name).toBe('Earth');
+    expect(result.data.visitedPlanets[0].name).toBe('Earth');
     expect(result.status).toBe(201);
 
     const result2 = await axiosClient.post('/login', undefined, user1Config);
@@ -148,18 +150,20 @@ describe('/travelingTo and positions', () => {
     expect(result.status).toBe(400);
   });
 
-  it('should update the users position to the planet if enough time has passed', async () => {
+  it('should update the users position to the planet if enough time has passed, and add the planet to visitedPlanets', async () => {
     await axiosClient.post('/login', undefined, user1Config);
     await axiosClient.post('/travelingTo/2', undefined, user1Config);
 
     jest.advanceTimersByTime(1000000000000);
 
-    const user = await axiosClient.post('/login', undefined, user1Config);
+    const { data } = await axiosClient.post('/login', undefined, user1Config);
+    const { visitedPlanets } = data;
 
-    expect(user.data.speed).toBe(0);
-    expect(user.data.positionX).toBe(user.data.planet.positionX);
-    expect(user.data.positionY).toBe(user.data.planet.positionY);
-    expect(user.data.positionZ).toBe(user.data.planet.positionZ);
+    expect(data.speed).toBe(0);
+    expect(data.positionX).toBe(data.planet.positionX);
+    expect(data.positionY).toBe(data.planet.positionY);
+    expect(data.positionZ).toBe(data.planet.positionZ);
+    expect(visitedPlanets.some((planet: Planet) => planet.id === 2)).toBe(true);
   });
 });
 
