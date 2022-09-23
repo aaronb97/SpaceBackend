@@ -42,10 +42,8 @@ export const defineRoutes = async (
         const earth = await fork.findOneOrFail(Planet, { name: 'Earth' });
 
         const name = generateName();
-        let username = await fork.findOne(Username, { name });
-        if (!username) {
-          username = new Username(name);
-        }
+        const username =
+          (await fork.findOne(Username, { name })) ?? new Username(name);
 
         const user = new User(token.uid, `${name}${username.count}`, earth);
         user.positionX = earth.positionX;
