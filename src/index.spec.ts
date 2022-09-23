@@ -202,4 +202,19 @@ describe('/speedBoost', () => {
 
     expect(result.status).toBe(400);
   });
+
+  it('should not allow the users speed to be boosted multiple times if speedBoost is rapidly called', async () => {
+    const result = await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(8 * 60 * 60 * 1000 + 1);
+
+    void axiosClient.post('/speedBoost', undefined, user1Config);
+    void axiosClient.post('/speedBoost', undefined, user1Config);
+    void axiosClient.post('/speedBoost', undefined, user1Config);
+
+    const result2 = await axiosClient.post('/login', undefined, user1Config);
+
+    expect(result2.data.speed).toBe(result.data.speed * 2);
+  });
 });
