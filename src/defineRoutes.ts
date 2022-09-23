@@ -45,7 +45,6 @@ export const defineRoutes = async (
         user.positionZ = earth.positionZ;
         await fork.persistAndFlush(user);
 
-        console.log('Successuly created user');
         res.status(201);
         res.json(await getUser(fork, token.uid));
       } else {
