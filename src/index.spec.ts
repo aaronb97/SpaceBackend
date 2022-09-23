@@ -74,22 +74,20 @@ describe('/planets', () => {
   });
 });
 
+const user1Config = {
+  headers: {
+    authorization: 'user1',
+  },
+};
+
 describe('/login', () => {
   test('it should create a new user when logging in with a new user', async () => {
-    const result = await axiosClient.post('/login', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    const result = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result.data.planet.name).toBe('Earth');
     expect(result.status).toBe(201);
 
-    const result2 = await axiosClient.post('/login', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    const result2 = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result2.status).toBe(200);
   });
@@ -106,25 +104,13 @@ describe('/travelingTo and positions', () => {
   });
 
   test('it should update users positions after traveling somewhere and time has passed', async () => {
-    const result = await axiosClient.post('/login', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    const result = await axiosClient.post('/login', undefined, user1Config);
 
-    await axiosClient.post('/travelingTo/2', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
 
     jest.advanceTimersByTime(1000);
 
-    const result2 = await axiosClient.post('/login', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    const result2 = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result.data.positionX).not.toBe(result2.data.positionX);
     expect(result.data.positionY).not.toBe(result2.data.positionY);
@@ -132,36 +118,24 @@ describe('/travelingTo and positions', () => {
   });
 
   test('it should return an error if the traveling id is invalid', async () => {
-    await axiosClient.post('/login', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    await axiosClient.post('/login', undefined, user1Config);
 
-    const result = await axiosClient.post('/travelingTo/-1', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    const result = await axiosClient.post(
+      '/travelingTo/-1',
+      undefined,
+      user1Config,
+    );
 
     expect(result.status).toBe(404);
   });
 
   test('it should return an error if the user is already associated with that planet', async () => {
-    const user = await axiosClient.post('/login', undefined, {
-      headers: {
-        authorization: 'user1',
-      },
-    });
+    const user = await axiosClient.post('/login', undefined, user1Config);
 
     const result = await axiosClient.post(
       `/travelingTo/${user.data.planet.id}`,
       undefined,
-      {
-        headers: {
-          authorization: 'user1',
-        },
-      },
+      user1Config,
     );
 
     expect(result.status).toBe(400);
