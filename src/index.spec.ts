@@ -141,3 +141,44 @@ describe('/travelingTo and positions', () => {
     expect(result.status).toBe(400);
   });
 });
+
+describe('/speedBoost', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2020, 1, 1));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('should boost the users speed if speedBoost is called after enough time has passed', async () => {
+    const result = await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(8 * 60 * 60 * 1000 + 1);
+
+    const result2 = await axiosClient.post(
+      '/speedBoost',
+      undefined,
+      user1Config,
+    );
+
+    expect(result2.data.speed).toBe(result.data.speed * 2);
+  });
+
+  it('should return an error if speedBoost is called but not enough time has not passed', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(1);
+
+    const result = await axiosClient.post(
+      '/speedBoost',
+      undefined,
+      user1Config,
+    );
+
+    expect(result.status).toBe(400);
+  });
+});
