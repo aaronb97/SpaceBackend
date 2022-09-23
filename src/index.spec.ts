@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import axios, { Axios } from 'axios';
 import express from 'express';
 import { defineRoutes } from './defineRoutes';
@@ -49,6 +50,7 @@ beforeAll(async () => {
 
   axiosClient = axios.create({
     baseURL: `http://127.0.0.1:${port}`,
+    validateStatus: () => true,
   });
 
   await orm.getMigrator().up();
@@ -127,5 +129,41 @@ describe('/travelingTo and positions', () => {
     expect(result.data.positionX).not.toBe(result2.data.positionX);
     expect(result.data.positionY).not.toBe(result2.data.positionY);
     expect(result.data.positionZ).not.toBe(result2.data.positionZ);
+  });
+
+  test('it should return an error if the traveling id is invalid', async () => {
+    await axiosClient.post('/login', undefined, {
+      headers: {
+        authorization: 'user1',
+      },
+    });
+
+    const result = await axiosClient.post('/travelingTo/-1', undefined, {
+      headers: {
+        authorization: 'user1',
+      },
+    });
+
+    expect(result.status).toBe(404);
+  });
+
+  test('it should return an error if the user is already associated with that planet', async () => {
+    const user = await axiosClient.post('/login', undefined, {
+      headers: {
+        authorization: 'user1',
+      },
+    });
+
+    const result = await axiosClient.post(
+      `/travelingTo/${user.data.planet.id}`,
+      undefined,
+      {
+        headers: {
+          authorization: 'user1',
+        },
+      },
+    );
+
+    expect(result.status).toBe(400);
   });
 });

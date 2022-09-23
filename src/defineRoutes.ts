@@ -123,9 +123,15 @@ export const defineRoutes = async (
 
       const user = await getUser(fork, token.uid);
 
-      const planet = await fork.findOneOrFail(Planet, {
+      const planet = await fork.findOne(Planet, {
         id: Number(req.params.id),
       });
+
+      if (!planet) {
+        res.status(404);
+        res.json(`Planet with id ${req.params.id} not found`);
+        return;
+      }
 
       if (planet.id === user.planet.id) {
         res.status(400);
