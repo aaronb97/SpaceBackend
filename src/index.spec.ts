@@ -92,3 +92,40 @@ describe('/login', () => {
     expect(result2.status).toBe(200);
   });
 });
+
+describe('/travelingTo and positions', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2020, 1, 1));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  test('it should update users positions after traveling somewhere and time has passed', async () => {
+    const result = await axiosClient.post('/login', undefined, {
+      headers: {
+        authorization: 'user1',
+      },
+    });
+
+    await axiosClient.post('/travelingTo/2', undefined, {
+      headers: {
+        authorization: 'user1',
+      },
+    });
+
+    jest.advanceTimersByTime(1000);
+
+    const result2 = await axiosClient.post('/login', undefined, {
+      headers: {
+        authorization: 'user1',
+      },
+    });
+
+    expect(result.data.positionX).not.toBe(result2.data.positionX);
+    expect(result.data.positionY).not.toBe(result2.data.positionY);
+    expect(result.data.positionZ).not.toBe(result2.data.positionZ);
+  });
+});
