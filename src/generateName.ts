@@ -1,5 +1,7 @@
 export function generateName() {
-  return `${getRandomElement(adjectives)}${getRandomElement(nouns)}`;
+  return `${getRandomElement(adjectives)}${getRandomElement(nouns)}${Math.floor(
+    Math.random() * 10000,
+  )}`;
 }
 
 function getRandomElement(array: string[]) {

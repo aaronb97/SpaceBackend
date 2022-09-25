@@ -11,7 +11,6 @@ import { validateUser } from './validateUser';
 import * as core from 'express-serve-static-core';
 import { Planet } from './entities/Planet';
 import { generateName } from './generateName';
-import { Username } from './entities/Username';
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -49,15 +48,14 @@ export const defineRoutes = async (
           { populate: ['items'] },
         );
 
-        const name = generateName();
-        const username =
-          (await fork.findOne(Username, { name })) ?? new Username(name);
+        let name;
+        do {
+          name = generateName();
+        } while (await fork.findOne(User, { username: name }));
 
-        const user = new User(token.uid, `${name}${username.count}`, earth);
+        const user = new User(token.uid, name, earth);
         user.landOnPlanet(earth);
 
-        username.count++;
-        fork.persist(username);
         await fork.persistAndFlush(user);
 
         res.status(201);
