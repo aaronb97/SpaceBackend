@@ -15,6 +15,7 @@ const config: Parameters<typeof MikroORM.init>[0] = {
   metadataProvider: TsMorphMetadataProvider,
   migrations: {
     path: path.join(__dirname, './migrations'),
+    disableForeignKeys: false,
   },
   driverOptions: isProd
     ? {
