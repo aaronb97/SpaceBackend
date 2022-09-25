@@ -3,6 +3,9 @@ import { defineRoutes } from './defineRoutes';
 import { app } from './express';
 import mikroOrmConfig from './mikro-orm.config';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
