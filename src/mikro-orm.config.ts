@@ -6,7 +6,7 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 const config: Parameters<typeof MikroORM.init>[0] = {
   dbName: process.env.DATABASE_NAME ?? 'space',
   type: 'postgresql' as const,
-  debug: !isProd,
+  debug: true,
   clientUrl: process.env.DATABASE_URL,
   user: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
@@ -16,6 +16,11 @@ const config: Parameters<typeof MikroORM.init>[0] = {
   migrations: {
     path: path.join(__dirname, './migrations'),
   },
+  driverOptions: isProd
+    ? {
+        connection: { ssl: { rejectUnauthorized: false } },
+      }
+    : undefined,
 };
 
 export default config;
