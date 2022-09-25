@@ -5,6 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon src/index.ts",
+    "start:prod": "rm -rf dist && tsc && node dist/index.js",
     "test": "jest .test.ts --watch",
     "integration": "jest .spec.ts --watch"
   },
