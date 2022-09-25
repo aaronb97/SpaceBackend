@@ -4,7 +4,7 @@ import { MikroORM } from '@mikro-orm/core';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
 const config: Parameters<typeof MikroORM.init>[0] = {
-  dbName: 'space',
+  dbName: process.env.DATABASE_NAME ?? 'space',
   type: 'postgresql' as const,
   debug: !isProd,
   clientUrl: process.env.DATABASE_URL,
