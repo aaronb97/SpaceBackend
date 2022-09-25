@@ -81,6 +81,11 @@ export class User extends Base {
     return new Date();
   }
 
+  @Property({ persist: false })
+  get speedBoostAvailable() {
+    return this.isNextBoostTimeLessThanCurrentTime();
+  }
+
   @Enum(() => UserStatus)
   status: UserStatus = UserStatus.LANDED;
 
@@ -108,6 +113,14 @@ export class User extends Base {
     this.positionX += this.velocityX * km;
     this.positionY += this.velocityY * km;
     this.positionZ += this.velocityZ * km;
+  }
+
+  public isNextBoostTimeLessThanCurrentTime() {
+    if (!this.nextBoost) {
+      return false;
+    }
+
+    return new Date().getTime() > this.nextBoost.getTime();
   }
 
   public isLandingTimeLessThanCurrentTime() {
