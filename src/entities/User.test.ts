@@ -1,3 +1,5 @@
+import { planets } from '../planets';
+import { Item } from './Item';
 import { Planet } from './Planet';
 import { User } from './User';
 
@@ -111,8 +113,12 @@ describe('updatePositions', () => {
     jest.useRealTimers();
   });
 
-  const setup = () => {
+  const setup = async () => {
     const planet = new Planet('test planet', 0, 'planet');
+    await planet.items.init();
+    planet.items.add(new Item('', 'common', planet));
+    planet.items.add(new Item('', 'rare', planet));
+    planet.items.add(new Item('', 'legendary', planet));
     planet.positionX = 900000;
     planet.positionY = 0;
     planet.positionZ = 0;
@@ -125,8 +131,8 @@ describe('updatePositions', () => {
     return { user, planet };
   };
 
-  it('should properly calculate positions after time has passed', () => {
-    const { user, planet } = setup();
+  it('should properly calculate positions after time has passed', async () => {
+    const { user, planet } = await setup();
 
     user.startTraveling(planet);
 
@@ -137,8 +143,8 @@ describe('updatePositions', () => {
     expect(user.positionX).toBe(500);
   });
 
-  it('should set the position to be the same as the planet if enough time has passed', () => {
-    const { user, planet } = setup();
+  it('should set the position to be the same as the planet if enough time has passed', async () => {
+    const { user, planet } = await setup();
 
     user.startTraveling(planet);
 

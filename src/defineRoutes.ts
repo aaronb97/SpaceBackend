@@ -20,7 +20,7 @@ const getUser = async (
   return await orm.findOneOrFail(
     User,
     { uid },
-    { populate: ['planet', 'visitedPlanets'] },
+    { populate: ['planet', 'visitedPlanets', 'items'] },
   );
 };
 
@@ -36,20 +36,25 @@ export const defineRoutes = async (
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const user = await fork.findOne(User, { uid: token.uid });
+      const user = await fork.findOne(
+        User,
+        { uid: token.uid },
+        { populate: ['items', 'planet', 'planet.items'] },
+      );
 
       if (!user) {
-        const earth = await fork.findOneOrFail(Planet, { name: 'Earth' });
+        const earth = await fork.findOneOrFail(
+          Planet,
+          { name: 'Earth' },
+          { populate: ['items'] },
+        );
 
         const name = generateName();
         const username =
           (await fork.findOne(Username, { name })) ?? new Username(name);
 
         const user = new User(token.uid, `${name}${username.count}`, earth);
-        user.visitedPlanets.add(earth);
-        user.positionX = earth.positionX;
-        user.positionY = earth.positionY;
-        user.positionZ = earth.positionZ;
+        user.landOnPlanet(earth);
 
         username.count++;
         fork.persist(username);
@@ -58,6 +63,7 @@ export const defineRoutes = async (
         res.status(201);
         res.json(await getUser(fork, token.uid));
       } else {
+        console.log(user);
         user.updatePositions();
         await fork.persistAndFlush(user);
 

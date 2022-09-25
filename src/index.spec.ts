@@ -91,6 +91,7 @@ describe('/login', () => {
 
     expect(result.data.planet.name).toBe('Earth');
     expect(result.data.visitedPlanets[0].name).toBe('Earth');
+    expect(result.data.items.length).toBe(1);
     expect(result.status).toBe(201);
 
     const result2 = await axiosClient.post('/login', undefined, user1Config);
@@ -165,6 +166,18 @@ describe('/travelingTo and positions', () => {
     expect(data.positionZ).toBe(data.planet.positionZ);
     expect(visitedPlanets.some((planet: Planet) => planet.id === 2)).toBe(true);
   });
+
+  it('should award the user with an item', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(1000000000000);
+
+    const { data } = await axiosClient.post('/login', undefined, user1Config);
+
+    // original for landing on earth + new item
+    expect(data.items.length).toBe(2);
+  });
 });
 
 describe('/speedBoost', () => {
@@ -178,8 +191,12 @@ describe('/speedBoost', () => {
   });
 
   it('should boost the users speed if speedBoost is called after enough time has passed', async () => {
-    const result = await axiosClient.post('/login', undefined, user1Config);
-    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user1Config);
+    const result = await axiosClient.post(
+      '/travelingTo/2',
+      undefined,
+      user1Config,
+    );
 
     jest.advanceTimersByTime(8 * 60 * 60 * 1000 + 1);
 
@@ -208,8 +225,12 @@ describe('/speedBoost', () => {
   });
 
   it('should not allow the users speed to be boosted multiple times if speedBoost is rapidly called', async () => {
-    const result = await axiosClient.post('/login', undefined, user1Config);
-    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user1Config);
+    const result = await axiosClient.post(
+      '/travelingTo/2',
+      undefined,
+      user1Config,
+    );
 
     jest.advanceTimersByTime(8 * 60 * 60 * 1000 + 1);
 

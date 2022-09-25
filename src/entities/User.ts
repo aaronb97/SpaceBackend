@@ -10,6 +10,7 @@ import {
 import { Base } from './Base';
 import { Planet } from './Planet';
 import { v4 } from 'uuid';
+import { Item } from './Item';
 
 const square = (num: number) => Math.pow(num, 2);
 
@@ -28,6 +29,9 @@ export class User extends Base {
 
   @ManyToMany()
   visitedPlanets = new Collection<Planet>(this);
+
+  @ManyToMany()
+  items = new Collection<Item>(this);
 
   @Property({ hidden: true, unique: true })
   uid: string;
@@ -84,22 +88,12 @@ export class User extends Base {
    * Update positions according the elapsed time since last update
    */
   public updatePositions() {
-    const time = new Date();
-
-    if (this.status === UserStatus.TRAVELING && time > this.landingTime!) {
-      this.nextBoost = undefined;
-      this.landingTime = undefined;
-      this.status = UserStatus.LANDED;
-      this.positionX = this.planet.positionX;
-      this.positionY = this.planet.positionY;
-      this.positionZ = this.planet.positionZ;
-      this.speed = 0;
-      this.velocityX = 0;
-      this.velocityY = 0;
-      this.velocityZ = 0;
-      this.visitedPlanets.add(this.planet);
+    if (this.isLandingTimeLessThanCurrentTime()) {
+      this.landOnPlanet(this.planet);
       return;
     }
+
+    const time = new Date();
 
     const last = this.updatedAt;
 
@@ -114,6 +108,49 @@ export class User extends Base {
     this.positionX += this.velocityX * km;
     this.positionY += this.velocityY * km;
     this.positionZ += this.velocityZ * km;
+  }
+
+  public isLandingTimeLessThanCurrentTime() {
+    if (!this.landingTime) {
+      return false;
+    }
+
+    return new Date().getTime() > this.landingTime.getTime();
+  }
+
+  public landOnPlanet(planet: Planet) {
+    this.nextBoost = undefined;
+    this.landingTime = undefined;
+    this.status = UserStatus.LANDED;
+    this.positionX = this.planet.positionX;
+    this.positionY = this.planet.positionY;
+    this.positionZ = this.planet.positionZ;
+    this.speed = 0;
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.velocityZ = 0;
+
+    if (!this.visitedPlanets.contains(planet)) {
+      const random = Math.random();
+
+      let rarity: string;
+      if (random <= 0.01) {
+        rarity = 'legendary';
+      } else if (random <= 0.1) {
+        rarity = 'rare';
+      } else {
+        rarity = 'common';
+      }
+
+      const item = planet.items.getItems().find((x) => x.rarity === rarity);
+      if (!item) {
+        throw new Error('Item not found');
+      }
+
+      this.items.add(item);
+    }
+
+    this.visitedPlanets.add(this.planet);
   }
 
   public setLandingTime() {
