@@ -181,7 +181,9 @@ export class User extends Base {
 
     const time = (distance / this.speed) * 60 * 60 * 1000;
 
-    this.landingTime = new Date(new Date().getTime() + time);
+    this.landingTime = new Date(
+      new Date().getTime() + Math.min(time, 3.154e13),
+    );
   }
 
   public startTraveling(planet: Planet) {

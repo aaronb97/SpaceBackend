@@ -1,5 +1,7 @@
 import { PlanetType } from './entities/Planet';
 
+const ps = 3.086e13;
+
 export const planets: PlanetPrototype[] = [
   [['Earth', 1.4971840021e8, -1.3726874353e7, -4.1149959529e2]],
   [['The Sun', 0, 0, 0], { type: 'star' }],
@@ -15,6 +17,10 @@ export const planets: PlanetPrototype[] = [
     ],
   ],
   [['Pluto', 2.375863387435778e9, -4.595375213874698e9, -1.955096540375657e8]],
+  [
+    ['Proxima Centauri', -0.472264 * ps, -0.361451 * ps, -1.151219 * ps],
+    { type: 'star' },
+  ],
 ];
 
 interface Options {
