@@ -47,8 +47,8 @@ export class User extends Base {
   /**
    * Speed in km / hour
    */
-  @Property({ default: 40000, type: 'float8' })
-  baseSpeed = 40000;
+  @Property({ default: 30000, type: 'float8' })
+  baseSpeed = 30000;
 
   @Property({ default: 0, type: 'float8' })
   speed = 0;
