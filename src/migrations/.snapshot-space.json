@@ -277,7 +277,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "50000",
+          "default": "40000",
           "mappedType": "double"
         },
         "speed": {
@@ -287,7 +287,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "default": "50000",
+          "default": "0",
           "mappedType": "double"
         },
         "position_x": {

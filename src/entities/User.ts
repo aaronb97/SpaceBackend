@@ -47,11 +47,11 @@ export class User extends Base {
   /**
    * Speed in km / hour
    */
-  @Property({ default: 50000, type: 'float8' })
-  baseSpeed = 50000;
+  @Property({ default: 40000, type: 'float8' })
+  baseSpeed = 40000;
 
-  @Property({ default: 50000, type: 'float8' })
-  speed = 50000;
+  @Property({ default: 0, type: 'float8' })
+  speed = 0;
 
   @Property({ type: 'float8' })
   positionX = 0;
@@ -162,6 +162,7 @@ export class User extends Base {
       }
 
       this.items.add(item);
+      this.baseSpeed += 10000;
     }
 
     this.visitedPlanets.add(this.planet);
