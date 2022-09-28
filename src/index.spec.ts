@@ -85,6 +85,12 @@ const user1Config = {
   },
 };
 
+const user2Config = {
+  headers: {
+    authorization: 'user2',
+  },
+};
+
 describe('/login', () => {
   it('should create a new user when logging in with a new user', async () => {
     const result = await axiosClient.post('/login', undefined, user1Config);
@@ -179,6 +185,25 @@ describe('/travelingTo and positions', () => {
     expect(data.positionZ).toBe(data.planet.positionZ);
     expect(visitedPlanets.some((planet: Planet) => planet.id === 2)).toBe(true);
     expect(data.notification.includes('Welcome')).toBe(true);
+  });
+
+  it('two users should be able to visit planets', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user2Config);
+    await axiosClient.post('/travelingTo/2', undefined, user2Config);
+
+    jest.advanceTimersByTime(1000000000000);
+
+    const { data } = await axiosClient.post('/login', undefined, user1Config);
+    const { data: data2 } = await axiosClient.post(
+      '/login',
+      undefined,
+      user2Config,
+    );
+
+    expect(data.visitedPlanets.length).toBe(2);
+    expect(data2.visitedPlanets.length).toBe(2);
   });
 
   it('should award the user with an item', async () => {
