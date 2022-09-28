@@ -82,7 +82,7 @@ export const defineRoutes = async (
         user.notification = undefined;
       }
     } catch (e) {
-      console.error(e);
+      console.error('Error', e);
       res.status(400);
       res.json('An error occured');
     }
@@ -166,7 +166,7 @@ export const defineRoutes = async (
       await fork.persistAndFlush(user);
       res.json(await getUser(fork, token.uid));
     } catch (e) {
-      console.error(e);
+      console.error('Error', e);
       res.status(400);
       res.json('An error occurred');
     }
