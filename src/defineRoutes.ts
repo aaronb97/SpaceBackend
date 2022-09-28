@@ -67,9 +67,10 @@ export const defineRoutes = async (
 
         user.notification = undefined;
       } else {
-        console.log(user);
         user.updatePositions();
         await fork.persistAndFlush(user);
+
+        console.log(`User ${user.uid} landed on planet ${user.planet.name}`);
 
         if (!user.notification && Math.random() < 0.01) {
           user.notification = getRandomElement(quotes);
