@@ -98,6 +98,19 @@ describe('/login', () => {
 
     expect(result2.status).toBe(200);
   });
+
+  it('there should be a notification when logging in for the first time', async () => {
+    const result = await axiosClient.post('/login', undefined, user1Config);
+
+    expect(result.data.notification.includes('Welcome')).toBe(true);
+  });
+
+  it('there should not be a notification when logging in for the second time', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    const result = await axiosClient.post('/login', undefined, user1Config);
+
+    expect(result.data.notification).toBeUndefined();
+  });
 });
 
 describe('/travelingTo and positions', () => {
@@ -165,6 +178,7 @@ describe('/travelingTo and positions', () => {
     expect(data.positionY).toBe(data.planet.positionY);
     expect(data.positionZ).toBe(data.planet.positionZ);
     expect(visitedPlanets.some((planet: Planet) => planet.id === 2)).toBe(true);
+    expect(data.notification.includes('Welcome')).toBe(true);
   });
 
   it('should award the user with an item', async () => {

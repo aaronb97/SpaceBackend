@@ -78,6 +78,9 @@ export class User extends Base {
   landingTime?: Date;
 
   @Property({ persist: false })
+  notification?: string;
+
+  @Property({ persist: false })
   get serverTime() {
     return new Date();
   }
@@ -159,6 +162,10 @@ export class User extends Base {
       const item = planet.items.getItems().find((x) => x.rarity === rarity);
       if (!item) {
         throw new Error('Item not found');
+      }
+
+      if (planet.name !== 'Earth') {
+        this.notification = `Welcome to ${planet.name}! Your base speed has increased by 10,000, and you have collected "${item.name}"`;
       }
 
       this.items.add(item);

@@ -11,6 +11,7 @@ import { validateUser } from './validateUser';
 import * as core from 'express-serve-static-core';
 import { Planet } from './entities/Planet';
 import { generateName } from './generateName';
+import { generateWelcomeText } from './generateWelcomeText';
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -55,11 +56,14 @@ export const defineRoutes = async (
 
         const user = new User(token.uid, name, earth);
         user.landOnPlanet(earth);
+        user.notification = generateWelcomeText();
 
         await fork.persistAndFlush(user);
 
         res.status(201);
         res.json(await getUser(fork, token.uid));
+
+        user.notification = undefined;
       } else {
         console.log(user);
         user.updatePositions();
@@ -67,6 +71,8 @@ export const defineRoutes = async (
 
         res.status(200);
         res.json(await getUser(fork, token.uid));
+
+        user.notification = undefined;
       }
     } catch (e) {
       console.error(e);

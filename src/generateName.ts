@@ -1,11 +1,9 @@
+import { getRandomElement } from './getRandomElement';
+
 export function generateName() {
   return `${getRandomElement(adjectives)}${getRandomElement(nouns)}${Math.floor(
     Math.random() * 10000,
   )}`;
-}
-
-function getRandomElement(array: string[]) {
-  return array[Math.floor(Math.random() * array.length)];
 }
 
 const nouns = [
