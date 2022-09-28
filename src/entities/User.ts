@@ -151,9 +151,9 @@ export class User extends Base {
       const random = Math.random();
 
       let rarity: string;
-      if (random <= 0.01) {
+      if (random <= 0.05) {
         rarity = 'legendary';
-      } else if (random <= 0.1) {
+      } else if (random <= 0.2) {
         rarity = 'rare';
       } else {
         rarity = 'common';
