@@ -12,6 +12,8 @@ import * as core from 'express-serve-static-core';
 import { Planet } from './entities/Planet';
 import { generateName } from './generateName';
 import { generateWelcomeText } from './generateWelcomeText';
+import { getRandomElement } from './getRandomElement';
+import { quotes } from './quotes';
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -68,6 +70,10 @@ export const defineRoutes = async (
         console.log(user);
         user.updatePositions();
         await fork.persistAndFlush(user);
+
+        if (!user.notification && Math.random() < 0.01) {
+          user.notification = getRandomElement(quotes);
+        }
 
         res.status(200);
         res.json(await getUser(fork, token.uid));
