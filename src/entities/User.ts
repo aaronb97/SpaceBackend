@@ -170,9 +170,9 @@ export class User extends Base {
 
       this.items.add(item);
       this.baseSpeed += 10000;
-    }
 
-    this.visitedPlanets.add(this.planet);
+      this.visitedPlanets.add(this.planet);
+    }
   }
 
   public setLandingTime() {
