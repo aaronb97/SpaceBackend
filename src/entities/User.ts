@@ -147,6 +147,8 @@ export class User extends Base {
     this.velocityY = 0;
     this.velocityZ = 0;
 
+    console.log(`User ${this.uid} landed on planet ${planet.name}`);
+
     if (!this.visitedPlanets.contains(planet)) {
       const random = Math.random();
 
