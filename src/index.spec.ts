@@ -221,6 +221,9 @@ describe('/speedBoost', () => {
     );
 
     expect(result2.data.speed).toBe(result.data.speed * 2);
+    expect(result2.data.notification).toBe(
+      `Your speed has been boosted from 40,000 to 80,000!`,
+    );
   });
 
   it('should return an error if speedBoost is called but not enough time has not passed', async () => {

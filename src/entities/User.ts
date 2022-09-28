@@ -223,10 +223,13 @@ export class User extends Base {
   }
 
   public speedBoost(speedBoostFactor = 2) {
+    const speed1 = this.speed;
     this.speed *= speedBoostFactor;
     this.velocityX *= speedBoostFactor;
     this.velocityY *= speedBoostFactor;
     this.velocityZ *= speedBoostFactor;
+
+    this.notification = `Your speed has been boosted from ${speed1.toLocaleString()} to ${this.speed.toLocaleString()}!`;
   }
 
   public updateNextBoost() {
