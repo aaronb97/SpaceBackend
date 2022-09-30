@@ -87,7 +87,9 @@ export const defineRoutes = async (
   });
 
   app.get('/planets', async (req, res) => {
-    const results = await orm.em.fork().find(Planet, {});
+    const results = await orm.em
+      .fork()
+      .find(Planet, {}, { populate: ['orbiting'] });
 
     res.json(results);
   });
@@ -132,7 +134,11 @@ export const defineRoutes = async (
         res.status(400);
         res.json('User can not recieve speed boost yet');
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Error', e);
+      res.status(400);
+      res.json('An error occurred');
+    }
   });
 
   app.post('/travelingTo/:id', async (req, res) => {

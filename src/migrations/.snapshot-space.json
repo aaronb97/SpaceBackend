@@ -35,6 +35,15 @@
           "length": 3,
           "mappedType": "datetime"
         },
+        "orbiting_id": {
+          "name": "orbiting_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "integer"
+        },
         "name": {
           "name": "name",
           "type": "varchar(255)",
@@ -113,7 +122,21 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {}
+      "foreignKeys": {
+        "planet_orbiting_id_foreign": {
+          "constraintName": "planet_orbiting_id_foreign",
+          "columnNames": [
+            "orbiting_id"
+          ],
+          "localTableName": "public.planet",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.planet",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      }
     },
     {
       "columns": {

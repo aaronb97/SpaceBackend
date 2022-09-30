@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   Property,
 } from '@mikro-orm/core';
@@ -23,6 +24,9 @@ export class Planet extends Base {
 
   @ManyToMany(() => User, (user) => user.visitedPlanets)
   visitedBy = new Collection<User>(this);
+
+  @ManyToOne({ nullable: true })
+  orbiting!: Planet;
 
   @OneToMany(() => Item, (item) => item.planet)
   items = new Collection<Item>(this);
