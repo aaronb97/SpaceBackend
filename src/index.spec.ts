@@ -206,6 +206,36 @@ describe('/travelingTo and positions', () => {
     expect(data2.visitedPlanets.length).toBe(2);
   });
 
+  it('leaving and then landing again should not increase the number of visitedPlanets', async () => {
+    const { data: data1 } = await axiosClient.post(
+      '/login',
+      undefined,
+      user1Config,
+    );
+
+    expect(data1.visitedPlanets.length).toBe(1);
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(1000000000000);
+
+    const { data: data2 } = await axiosClient.post(
+      '/login',
+      undefined,
+      user1Config,
+    );
+    expect(data2.visitedPlanets.length).toBe(2);
+
+    await axiosClient.post('/travelingTo/1', undefined, user1Config);
+    jest.advanceTimersByTime(1000000000000);
+
+    const { data: data3 } = await axiosClient.post(
+      '/login',
+      undefined,
+      user1Config,
+    );
+    expect(data3.visitedPlanets.length).toBe(2);
+  });
+
   it('should award the user with an item', async () => {
     await axiosClient.post('/login', undefined, user1Config);
     await axiosClient.post('/travelingTo/2', undefined, user1Config);
