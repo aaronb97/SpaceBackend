@@ -185,9 +185,9 @@ export class User extends Base {
       this.planet.positionZ,
     ];
 
-    const distance = Math.sqrt(
-      square(x2 - x1) + (square(y2 - y1) + square(z2 - z1)),
-    );
+    const distance =
+      Math.sqrt(square(x2 - x1) + (square(y2 - y1) + square(z2 - z1))) -
+        this.planet.radius ?? 1000;
 
     const time = (distance / this.speed) * 60 * 60 * 1000;
 
@@ -197,12 +197,6 @@ export class User extends Base {
   }
 
   public startTraveling(planet: Planet) {
-    this.planet = planet;
-    this.speed = this.baseSpeed;
-    this.status = UserStatus.TRAVELING;
-
-    this.setLandingTime();
-
     const vector = [
       planet.positionX - this.positionX,
       planet.positionY - this.positionY,
@@ -222,6 +216,20 @@ export class User extends Base {
     this.velocityX = unitVector[0] * this.baseSpeed;
     this.velocityY = unitVector[1] * this.baseSpeed;
     this.velocityZ = unitVector[2] * this.baseSpeed;
+
+    if (this.status === UserStatus.LANDED) {
+      const radius = this.planet.radius ?? 100 + 10;
+      this.positionX += unitVector[0] * radius;
+      this.positionY += unitVector[1] * radius;
+      this.positionZ += unitVector[2] * radius;
+    }
+
+    this.planet = planet;
+    this.speed = this.baseSpeed;
+
+    this.status = UserStatus.TRAVELING;
+
+    this.setLandingTime();
   }
 
   public speedBoost(speedBoostFactor = 2) {
