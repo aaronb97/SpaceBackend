@@ -38,7 +38,7 @@ export const defineRoutes = async (
       const user = await fork.findOne(
         User,
         { uid: token.uid },
-        { populate: ['items', 'planet', 'planet.items'] },
+        { populate: ['items', 'planet', 'planet.items', 'visitedPlanets'] },
       );
 
       if (!user) {
