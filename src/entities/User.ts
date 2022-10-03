@@ -12,6 +12,7 @@ import { Planet } from './Planet';
 import { v4 } from 'uuid';
 import { Item } from './Item';
 import { calculateDist } from '../calculateDist';
+import { UserGroup } from './UserGroup';
 
 const square = (num: number) => Math.pow(num, 2);
 
@@ -33,6 +34,9 @@ export class User extends Base {
 
   @ManyToMany()
   items = new Collection<Item>(this);
+
+  @ManyToMany(() => UserGroup, (group) => group.users)
+  groups = new Collection<UserGroup>(this);
 
   @Property({ hidden: true, unique: true })
   uid: string;

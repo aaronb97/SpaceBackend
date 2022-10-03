@@ -28,6 +28,8 @@ let orm: MikroORM<IDatabaseDriver<Connection>>;
 
 const initializeWebServer = async () => {
   expressApp = express();
+  expressApp.use(express.urlencoded({ extended: true }));
+  expressApp.use(express.json());
   orm = await MikroORM.init({ ...mikroOrmConfig, dbName: 'spaceTest' });
   connection = expressApp.listen();
 };
@@ -364,5 +366,36 @@ describe('/speedBoost', () => {
     const result2 = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result2.data.speed).toBe(result.data.speed * 2);
+  });
+});
+
+describe('userGroups', () => {
+  it('creating a group without a name should return an error', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+
+    const result = await axiosClient.post(
+      '/userGroups',
+      undefined,
+      user1Config,
+    );
+
+    expect(result.status).toBe(400);
+  });
+
+  it.only('should allow users to create groups', async () => {
+    const result0 = await axiosClient.post('/login', undefined, user1Config);
+    expect(result0.data.groups.length).toBe(0);
+
+    const groupStatus = await axiosClient.post(
+      '/userGroups',
+      { name: 'New Usergroup' },
+      user1Config,
+    );
+
+    expect(groupStatus.status).toBe(200);
+
+    const result = await axiosClient.post('/login', undefined, user1Config);
+
+    expect(result.data.groups.length).toBe(1);
   });
 });

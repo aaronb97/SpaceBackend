@@ -13,6 +13,7 @@ import { generateName } from './generateName';
 import { generateWelcomeText } from './generateWelcomeText';
 import { getRandomElement } from './getRandomElement';
 import { quotes } from './quotes';
+import { UserGroup } from './entities/UserGroup';
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -21,7 +22,7 @@ const getUser = async (
   return await orm.findOneOrFail(
     User,
     { uid },
-    { populate: ['planet', 'visitedPlanets', 'items'] },
+    { populate: ['planet', 'visitedPlanets', 'items', 'groups'] },
   );
 };
 
@@ -169,6 +170,32 @@ export const defineRoutes = async (
     } catch (e) {
       console.error('Error', e);
       res.status(400);
+      res.json('An error occurred');
+    }
+  });
+
+  app.post('/userGroups', async (req, res) => {
+    try {
+      const token = await validateUser(req.headers.authorization);
+      const user = await getUser(fork, token.uid);
+
+      console.log(req.body);
+
+      if (!req.body.name || typeof req.body.name !== 'string') {
+        res.status(402);
+        res.json('Invalid userGroup name');
+        return;
+      }
+
+      const group = new UserGroup();
+      group.name = req.body.name;
+      group.users.add(user);
+
+      await fork.persistAndFlush(group);
+      res.json('Successfully created group');
+    } catch (e) {
+      console.error('Error', e);
+      res.status(401);
       res.json('An error occurred');
     }
   });
