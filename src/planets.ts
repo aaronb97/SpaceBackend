@@ -80,7 +80,8 @@ export const planets: PlanetPrototype[] = [
 ];
 
 interface Options {
-  type: PlanetType;
+  type?: PlanetType;
+  radius?: number;
 }
 
 export type PlanetPrototype = [[string, number, number, number], Options?];

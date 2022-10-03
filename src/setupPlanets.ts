@@ -14,9 +14,14 @@ export const setupPlanets = async (
     let entity = await orm.findOne(Planet, { name });
     if (!entity) {
       entity = new Planet(name, 0, options?.type ?? 'planet');
+
       entity.items.add(new Item(`${name} trophy`, 'common', entity));
       entity.items.add(new Item(`${name} trophy`, 'rare', entity));
       entity.items.add(new Item(`${name} trophy`, 'legendary', entity));
+    }
+
+    if (options?.radius) {
+      entity.radius = options.radius;
     }
 
     entity.positionX = x;

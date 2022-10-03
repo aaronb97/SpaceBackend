@@ -11,6 +11,7 @@ import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { Planet } from './entities/Planet';
 import { PlanetPrototype } from './planets';
 import { setupPlanets } from './setupPlanets';
+import { calculateDist } from './calculateDist';
 
 jest.mock('./validateUser');
 
@@ -39,10 +40,12 @@ const stopWebServer = async () => {
   });
 };
 
+const EARTH_RADIUS = 1000;
+
 const mockPlanets: PlanetPrototype[] = [
-  [['Earth', 0, 0, 1e8]],
-  [['The Sun', 0, 0, 0]],
-  [['The Moon', 0, 0, 1.1e8]],
+  [['Earth', 0, 0, 1e8], { radius: EARTH_RADIUS }],
+  [['The Sun', 0, 0, 0], { radius: 10000 }],
+  [['The Moon', 0, 0, 1.1e8], { radius: 100 }],
 ];
 
 beforeAll(async () => {
@@ -158,6 +161,38 @@ describe('/travelingTo and positions', () => {
         data1.positionY !== data2.positionY ||
         data1.positionZ !== data2.positionZ,
     ).toBe(true);
+  });
+
+  it('should update users positions after starting to travel to be on the edge of the starting planet', async () => {
+    const result = await axiosClient.post('/login', undefined, user1Config);
+
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    const result2 = await axiosClient.post('/login', undefined, user1Config);
+
+    const data1 = result.data;
+    const data2 = result2.data;
+
+    expect(calculateDist(data1, data2)).toBe(EARTH_RADIUS);
+  });
+
+  it('should not update users positions after starting to travel if the user is already traveling', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+
+    await axiosClient.post('/travelingTo/2', undefined, user1Config);
+
+    jest.advanceTimersByTime(1000);
+
+    const result1 = await axiosClient.post('/login', undefined, user1Config);
+
+    await axiosClient.post('/travelingTo/1', undefined, user1Config);
+
+    const result2 = await axiosClient.post('/login', undefined, user1Config);
+
+    const data1 = result1.data;
+    const data2 = result2.data;
+
+    expect(calculateDist(data1, data2)).toBe(0);
   });
 
   it('should return an error if the traveling id is invalid', async () => {

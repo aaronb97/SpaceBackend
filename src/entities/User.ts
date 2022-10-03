@@ -11,6 +11,7 @@ import { Base } from './Base';
 import { Planet } from './Planet';
 import { v4 } from 'uuid';
 import { Item } from './Item';
+import { calculateDist } from '../calculateDist';
 
 const square = (num: number) => Math.pow(num, 2);
 
@@ -178,16 +179,7 @@ export class User extends Base {
   }
 
   public setLandingTime() {
-    const [x1, y1, z1] = [this.positionX, this.positionY, this.positionZ];
-    const [x2, y2, z2] = [
-      this.planet.positionX,
-      this.planet.positionY,
-      this.planet.positionZ,
-    ];
-
-    const distance =
-      Math.sqrt(square(x2 - x1) + (square(y2 - y1) + square(z2 - z1))) -
-        this.planet.radius ?? 1000;
+    const distance = calculateDist(this, this.planet) - this.planet.radius;
 
     const time = (distance / this.speed) * 60 * 60 * 1000;
 
@@ -218,7 +210,7 @@ export class User extends Base {
     this.velocityZ = unitVector[2] * this.baseSpeed;
 
     if (this.status === UserStatus.LANDED) {
-      const radius = this.planet.radius ?? 100 + 10;
+      const radius = this.planet.radius;
       this.positionX += unitVector[0] * radius;
       this.positionY += unitVector[1] * radius;
       this.positionZ += unitVector[2] * radius;
