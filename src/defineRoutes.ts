@@ -6,7 +6,6 @@ import {
   MikroORM,
 } from '@mikro-orm/core';
 import { User, UserStatus } from './entities/User';
-import { setupPlanets } from './setupPlanets';
 import { validateUser } from './validateUser';
 import * as core from 'express-serve-static-core';
 import { Planet } from './entities/Planet';
@@ -31,8 +30,6 @@ export const defineRoutes = async (
   orm: MikroORM<IDatabaseDriver<Connection>>,
 ) => {
   const fork = orm.em.fork();
-
-  await setupPlanets(orm.em.fork());
 
   app.post('/login', async (req, res) => {
     try {

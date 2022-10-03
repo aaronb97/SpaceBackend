@@ -9,6 +9,8 @@ import mikroOrmConfig from './mikro-orm.config';
 import { validateUser } from './validateUser';
 import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 import { Planet } from './entities/Planet';
+import { PlanetPrototype } from './planets';
+import { setupPlanets } from './setupPlanets';
 
 jest.mock('./validateUser');
 
@@ -37,6 +39,12 @@ const stopWebServer = async () => {
   });
 };
 
+const mockPlanets: PlanetPrototype[] = [
+  [['Earth', 0, 0, 1e8]],
+  [['The Sun', 0, 0, 0]],
+  [['The Moon', 0, 0, 1.1e8]],
+];
+
 beforeAll(async () => {
   await initializeWebServer();
 
@@ -55,6 +63,7 @@ beforeAll(async () => {
   });
 
   await orm.getMigrator().up();
+  await setupPlanets(orm.em.fork(), mockPlanets);
   await defineRoutes(expressApp, orm);
 });
 
@@ -141,9 +150,14 @@ describe('/travelingTo and positions', () => {
 
     const result2 = await axiosClient.post('/login', undefined, user1Config);
 
-    expect(result.data.positionX).not.toBe(result2.data.positionX);
-    expect(result.data.positionY).not.toBe(result2.data.positionY);
-    expect(result.data.positionZ).not.toBe(result2.data.positionZ);
+    const data1 = result.data;
+    const data2 = result2.data;
+
+    expect(
+      data1.positionX !== data2.positionX ||
+        data1.positionY !== data2.positionY ||
+        data1.positionZ !== data2.positionZ,
+    ).toBe(true);
   });
 
   it('should return an error if the traveling id is invalid', async () => {

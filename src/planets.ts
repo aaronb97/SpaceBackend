@@ -83,6 +83,6 @@ interface Options {
   type: PlanetType;
 }
 
-type PlanetPrototype = [[string, number, number, number], Options?];
+export type PlanetPrototype = [[string, number, number, number], Options?];
 
 // regex to limit to 10 sig figs: (?<=\d\.\d{10})\d+

@@ -1,10 +1,11 @@
 import { EntityManager, IDatabaseDriver, Connection } from '@mikro-orm/core';
 import { Item } from './entities/Item';
 import { Planet } from './entities/Planet';
-import { planets } from './planets';
+import { PlanetPrototype } from './planets';
 
 export const setupPlanets = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
+  planets: PlanetPrototype[],
 ) => {
   for (const planet of planets) {
     const [attr, options] = planet;

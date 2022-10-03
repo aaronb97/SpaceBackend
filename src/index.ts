@@ -4,12 +4,17 @@ import { app } from './express';
 import mikroOrmConfig from './mikro-orm.config';
 
 import * as dotenv from 'dotenv';
+import { setupPlanets } from './setupPlanets';
+import { planets } from './planets';
+
 dotenv.config();
 
 const main = async () => {
   const orm = await MikroORM.init(mikroOrmConfig);
 
   await orm.getMigrator().up();
+
+  await setupPlanets(orm.em.fork(), planets);
 
   await defineRoutes(app, orm);
 
