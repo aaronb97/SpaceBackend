@@ -22,7 +22,24 @@ const getUser = async (
   return await orm.findOneOrFail(
     User,
     { uid },
-    { populate: ['planet', 'visitedPlanets', 'items', 'groups'] },
+    {
+      fields: [
+        'planet',
+        'visitedPlanets.name',
+        'visitedPlanets.id',
+        'items.name',
+        'items.rarity',
+        'groups.name',
+        'groups.users.username',
+        'positionX',
+        'positionY',
+        'positionZ',
+        'speed',
+        'status',
+        'nextBoost',
+        'landingTime',
+      ],
+    },
   );
 };
 
@@ -61,6 +78,7 @@ export const defineRoutes = async (
         await fork.persistAndFlush(user);
 
         res.status(201);
+
         res.json(await getUser(fork, token.uid));
 
         user.notification = undefined;
@@ -174,6 +192,18 @@ export const defineRoutes = async (
     }
   });
 
+  app.get('/userGroups', async (req, res) => {
+    const token = await validateUser(req.headers.authorization);
+    const user = await getUser(fork, token.uid);
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const groupIds = user.groups.getIdentifiers() as number[];
+
+    const groups = await fork.find(UserGroup, { id: { $in: groupIds } });
+
+    res.json(groups);
+  });
+
   app.post('/userGroups', async (req, res) => {
     try {
       const token = await validateUser(req.headers.authorization);
@@ -182,7 +212,7 @@ export const defineRoutes = async (
       console.log(req.body);
 
       if (!req.body.name || typeof req.body.name !== 'string') {
-        res.status(402);
+        res.status(400);
         res.json('Invalid userGroup name');
         return;
       }
@@ -195,7 +225,7 @@ export const defineRoutes = async (
       res.json('Successfully created group');
     } catch (e) {
       console.error('Error', e);
-      res.status(401);
+      res.status(400);
       res.json('An error occurred');
     }
   });

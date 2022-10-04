@@ -382,7 +382,7 @@ describe('userGroups', () => {
     expect(result.status).toBe(400);
   });
 
-  it.only('should allow users to create groups', async () => {
+  it('should allow users to create groups', async () => {
     const result0 = await axiosClient.post('/login', undefined, user1Config);
     expect(result0.data.groups.length).toBe(0);
 
