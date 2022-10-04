@@ -31,6 +31,7 @@ const getUser = async (
         'items.rarity',
         'groups.name',
         'groups.users.username',
+        'groups.uuid',
         'positionX',
         'positionY',
         'positionZ',
@@ -222,7 +223,38 @@ export const defineRoutes = async (
       group.users.add(user);
 
       await fork.persistAndFlush(group);
-      res.json('Successfully created group');
+      res.json(group);
+    } catch (e) {
+      console.error('Error', e);
+      res.status(400);
+      res.json('An error occurred');
+    }
+  });
+
+  app.post('/joinGroup/:uuid', async (req, res) => {
+    try {
+      const token = await validateUser(req.headers.authorization);
+      const user = await getUser(fork, token.uid);
+
+      const uuid = req.params.uuid;
+
+      if (!req.params.uuid) {
+        res.status(400);
+        res.json('Invalid uuid');
+        return;
+      }
+
+      const group = await fork.findOne(UserGroup, { uuid });
+      if (!group) {
+        res.status(404);
+        res.json('Group not found');
+        return;
+      }
+
+      group.users.add(user);
+
+      await fork.persistAndFlush(group);
+      res.json('Successfully joined group');
     } catch (e) {
       console.error('Error', e);
       res.status(400);

@@ -74,6 +74,7 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await orm.em.nativeDelete('user', {});
+  await orm.em.nativeDelete('user_group', {});
 });
 
 afterAll(async () => {
@@ -397,5 +398,26 @@ describe('userGroups', () => {
     const result = await axiosClient.post('/login', undefined, user1Config);
 
     expect(result.data.groups.length).toBe(1);
+  });
+
+  it('should allow users to join groups', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user2Config);
+
+    const group = await axiosClient.post(
+      '/userGroups',
+      { name: 'New Usergroup' },
+      user1Config,
+    );
+
+    expect(group.data.users.length).toBe(1);
+
+    const uuid = group.data.uuid;
+
+    await axiosClient.post(`joinGroup/${uuid}`, undefined, user2Config);
+
+    const result = await axiosClient.post('/login', undefined, user1Config);
+
+    expect(result.data.groups[0].users.length).toBe(2);
   });
 });
