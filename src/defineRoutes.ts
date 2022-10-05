@@ -14,6 +14,7 @@ import { generateWelcomeText } from './generateWelcomeText';
 import { getRandomElement } from './getRandomElement';
 import { quotes } from './quotes';
 import { UserGroup } from './entities/UserGroup';
+import { generateColor } from './generateColor';
 
 const getUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
@@ -31,6 +32,7 @@ const getUser = async (
         'items.rarity',
         'groups.name',
         'groups.users.username',
+        'groups.users.color',
         'groups.uuid',
         'positionX',
         'positionY',
@@ -84,6 +86,10 @@ export const defineRoutes = async (
 
         user.notification = undefined;
       } else {
+        if (!user.color) {
+          user.color = generateColor();
+        }
+
         user.updatePositions();
         await fork.persistAndFlush(user);
 
@@ -176,7 +182,9 @@ export const defineRoutes = async (
 
       if (planet.id === user.planet.id) {
         res.status(400);
-        res.json('User is already traveling to planet with id' + req.params.id);
+        res.json(
+          `User is already traveling to planet with id ${req.params.id}`,
+        );
         return;
       }
 
@@ -270,7 +278,7 @@ export const defineRoutes = async (
       group.users.add(user);
 
       await fork.persistAndFlush(group);
-      res.json('Successfully joined group');
+      res.json(group);
     } catch (e) {
       console.error('Error', e);
       res.status(400);

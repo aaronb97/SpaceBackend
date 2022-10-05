@@ -293,6 +293,16 @@
           "nullable": false,
           "mappedType": "string"
         },
+        "color": {
+          "name": "color",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "''",
+          "mappedType": "string"
+        },
         "base_speed": {
           "name": "base_speed",
           "type": "double precision",

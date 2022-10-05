@@ -13,6 +13,7 @@ import { v4 } from 'uuid';
 import { Item } from './Item';
 import { calculateDist } from '../calculateDist';
 import { UserGroup } from './UserGroup';
+import { generateColor } from '../generateColor';
 
 const square = (num: number) => Math.pow(num, 2);
 
@@ -48,6 +49,9 @@ export class User extends Base {
   @Unique()
   @Property()
   username: string;
+
+  @Property({ default: '' })
+  color: string = generateColor();
 
   /**
    * Speed in km / hour
