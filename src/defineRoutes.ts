@@ -212,9 +212,19 @@ export const defineRoutes = async (
 
       console.log(req.body);
 
-      if (!req.body.name || typeof req.body.name !== 'string') {
+      if (
+        !req.body.name ||
+        typeof req.body.name !== 'string' ||
+        req.body.name.length > 20
+      ) {
         res.status(400);
         res.json('Invalid userGroup name');
+        return;
+      }
+
+      if (await fork.findOne(UserGroup, { name: req.body.name })) {
+        res.status(400);
+        res.json('Group name already exists');
         return;
       }
 
@@ -248,6 +258,12 @@ export const defineRoutes = async (
       if (!group) {
         res.status(404);
         res.json('Group not found');
+        return;
+      }
+
+      if (user.groups.contains(group)) {
+        res.status(400);
+        res.json('User is already in group');
         return;
       }
 
