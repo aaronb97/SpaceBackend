@@ -92,6 +92,9 @@ export class User extends Base {
   @Property({ persist: false })
   notification?: string;
 
+  @Property({ default: false })
+  godmode!: boolean;
+
   @Property({ persist: false })
   get serverTime() {
     return new Date();
@@ -158,7 +161,8 @@ export class User extends Base {
     return new Date().getTime() > this.landingTime.getTime();
   }
 
-  public landOnPlanet(planet: Planet) {
+  public landOnPlanet(planet: Planet, collectItem = true) {
+    this.planet = planet;
     this.nextBoost = undefined;
     this.landingTime = undefined;
     this.status = UserStatus.LANDED;
@@ -172,7 +176,7 @@ export class User extends Base {
 
     console.log(`User ${this.uid} landed on planet ${planet.name}`);
 
-    if (!this.visitedPlanets.contains(planet)) {
+    if (!this.visitedPlanets.contains(planet) && collectItem) {
       const oldLevel = this.level;
 
       const random = Math.random();

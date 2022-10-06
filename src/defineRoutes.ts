@@ -204,6 +204,39 @@ export const defineRoutes = async (
     }
   });
 
+  app.post('/teleport/:id', async (req, res) => {
+    try {
+      const token = await validateUser(req.headers.authorization);
+
+      const user = await getUser(fork, token.uid);
+
+      if (!user.godmode) {
+        res.status(401);
+        return;
+      }
+
+      const planet = await fork.findOne(Planet, {
+        id: Number(req.params.id),
+      });
+
+      if (!planet) {
+        res.status(404);
+        res.json(`Planet with id ${req.params.id} not found`);
+        return;
+      }
+
+      user.landOnPlanet(planet, false);
+      user.updatePositions();
+
+      await fork.persistAndFlush(user);
+      res.json(await getUser(fork, token.uid));
+    } catch (e) {
+      console.error('Error', e);
+      res.status(400);
+      res.json('An error occurred');
+    }
+  });
+
   app.get('/userGroups', async (req, res) => {
     const token = await validateUser(req.headers.authorization);
     const user = await getUser(fork, token.uid);
