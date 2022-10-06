@@ -10,7 +10,7 @@ import { Base } from './Base';
 import { Item } from './Item';
 import { User } from './User';
 
-export type PlanetType = 'planet' | 'moon' | 'star';
+export type PlanetType = 'planet' | 'moon' | 'star' | 'dwarf';
 
 @Entity()
 export class Planet extends Base {

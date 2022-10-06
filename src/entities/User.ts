@@ -53,6 +53,9 @@ export class User extends Base {
   @Property({ default: '' })
   color: string = generateColor();
 
+  @Property({ default: 0 })
+  xp = 0;
+
   /**
    * Speed in km / hour
    */
@@ -97,6 +100,17 @@ export class User extends Base {
   @Property({ persist: false })
   get speedBoostAvailable() {
     return this.isNextBoostTimeLessThanCurrentTime();
+  }
+
+  @Property({ persist: false })
+  public get level() {
+    let level = 1;
+
+    while (Math.pow(level, 1.5) < this.xp) {
+      level++;
+    }
+
+    return level;
   }
 
   @Enum(() => UserStatus)
@@ -159,13 +173,17 @@ export class User extends Base {
     console.log(`User ${this.uid} landed on planet ${planet.name}`);
 
     if (!this.visitedPlanets.contains(planet)) {
+      const oldLevel = this.level;
+
       const random = Math.random();
 
       let rarity: string;
       if (random <= 0.05) {
         rarity = 'legendary';
+        this.xp += 3;
       } else if (random <= 0.2) {
         rarity = 'rare';
+        this.xp += 1;
       } else {
         rarity = 'common';
       }
@@ -175,14 +193,62 @@ export class User extends Base {
         throw new Error('Item not found');
       }
 
+      const baseSpeedIncrease = this.getBaseSpeedIncrease(planet);
+
       if (planet.name !== 'Earth') {
-        this.notification = `Welcome to ${planet.name}! Your base speed has increased by 10,000, and you have collected "${item.name}"`;
+        this.notification = `Welcome to ${
+          planet.name
+        }! Your base speed has increased by ${baseSpeedIncrease.toLocaleString()}, and you have collected "${
+          item.name
+        }"`;
+
+        this.xp += this.getXPIncrease(planet);
+
+        const newLevel = this.level;
+
+        if (newLevel > oldLevel) {
+          this.notification += ` You have leveled up from Level ${oldLevel} to Level ${newLevel}!`;
+        }
       }
 
       this.items.add(item);
-      this.baseSpeed += 10000;
+      this.baseSpeed += baseSpeedIncrease;
 
       this.visitedPlanets.add(this.planet);
+    }
+  }
+
+  public getBaseSpeedIncrease(planet: Planet) {
+    switch (planet.type) {
+      case 'planet':
+        return 10000;
+      case 'moon':
+        return 5000;
+      case 'star':
+        return 30000;
+      case 'dwarf':
+        return 7500;
+    }
+  }
+
+  public getXPIncrease(planet: Planet) {
+    if (planet.name === 'Earth') {
+      return 0;
+    }
+
+    if (planet.name === 'The Sun') {
+      return 15;
+    }
+
+    switch (planet.type) {
+      case 'planet':
+        return 10;
+      case 'moon':
+        return 3;
+      case 'star':
+        return 30;
+      case 'dwarf':
+        return 5;
     }
   }
 
@@ -239,7 +305,14 @@ export class User extends Base {
     this.velocityY *= speedBoostFactor;
     this.velocityZ *= speedBoostFactor;
 
+    const oldLevel = this.level;
+    this.xp += 1;
+    const newLevel = this.level;
+
     this.notification = `Your speed has been boosted from ${speed1.toLocaleString()} to ${this.speed.toLocaleString()}!`;
+    if (newLevel > oldLevel) {
+      this.notification += ` You have leveled up from Level ${oldLevel} to Level ${newLevel}!`;
+    }
   }
 
   public updateNextBoost() {
