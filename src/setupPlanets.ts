@@ -24,6 +24,10 @@ export const setupPlanets = async (
       entity.radius = options.radius;
     }
 
+    if (options?.type) {
+      entity.type = options.type;
+    }
+
     entity.positionX = x;
     entity.positionY = y;
     entity.positionZ = z;
