@@ -36,6 +36,7 @@ const getUser = async (
         'groups.users.positionX',
         'groups.users.positionY',
         'groups.users.positionZ',
+        'groups.users.xp',
         'groups.uuid',
         'positionX',
         'positionY',
