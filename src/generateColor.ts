@@ -1,3 +1,6 @@
 export const generateColor = () => {
-  return `hsl(${360 * Math.random()},65%,75%)`;
+  const h = 360 * Math.random();
+  const s = 75 + Math.random() * 25;
+  const l = 50 + Math.random() * 25;
+  return `hsl(${h},${s}%,${l}%)`;
 };
