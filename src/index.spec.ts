@@ -149,12 +149,14 @@ describe('/travelingTo and positions', () => {
 
   it('should update users positions after traveling somewhere and time has passed', async () => {
     const result = await axiosClient.post('/login', undefined, user1Config);
+    expect(result.status).toBe(201);
 
     await axiosClient.post('/travelingTo/2', undefined, user1Config);
 
     jest.advanceTimersByTime(1000);
 
     const result2 = await axiosClient.post('/login', undefined, user1Config);
+    expect(result2.status).toBe(200);
 
     const data1 = result.data;
     const data2 = result2.data;
@@ -328,9 +330,11 @@ describe('/speedBoost', () => {
     );
 
     expect(result2.data.speed).toBe(result.data.speed * 2);
-    expect(result2.data.notification).toBe(
-      `Your speed has been boosted from 40,000 to 80,000!`,
-    );
+    expect(
+      result2.data.notification.includes(
+        `Your speed has been boosted from 40,000 to 80,000!`,
+      ),
+    ).toBe(true);
   });
 
   it('should return an error if speedBoost is called but not enough time has not passed', async () => {
@@ -414,10 +418,38 @@ describe('userGroups', () => {
 
     const uuid = group.data.uuid;
 
+    const result = await axiosClient.post(
+      `joinGroup/${uuid}`,
+      undefined,
+      user2Config,
+    );
+
+    expect(result.data.groups[0].users.length).toBe(2);
+  });
+
+  it('internal details of users from other groups should not be visible', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    const user2Login = await axiosClient.post('/login', undefined, user2Config);
+    const user2Username = user2Login.data.username;
+
+    const group = await axiosClient.post(
+      '/userGroups',
+      { name: 'New Usergroup' },
+      user1Config,
+    );
+
+    const uuid = group.data.uuid;
+
     await axiosClient.post(`joinGroup/${uuid}`, undefined, user2Config);
 
     const result = await axiosClient.post('/login', undefined, user1Config);
+    console.log(result.data.groups[0].users);
+    const user2 = result.data.groups[0].users.find(
+      (user: { username: any }) => user.username === user2Username,
+    );
 
-    expect(result.data.groups[0].users.length).toBe(2);
+    expect(user2.username).toBeDefined();
+    expect(user2.uid).toBeUndefined();
+    expect(user2.uuid).toBeUndefined();
   });
 });

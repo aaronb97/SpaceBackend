@@ -3,6 +3,7 @@ import {
   Connection,
   EntityManager,
   IDatabaseDriver,
+  LockMode,
   MikroORM,
 } from '@mikro-orm/core';
 import { User, UserStatus } from './entities/User';
@@ -16,7 +17,7 @@ import { quotes } from './quotes';
 import { UserGroup } from './entities/UserGroup';
 import { generateColor } from './generateColor';
 
-const getUser = async (
+const serializeUser = async (
   orm: EntityManager<IDatabaseDriver<Connection>>,
   uid: string,
 ) => {
@@ -25,6 +26,7 @@ const getUser = async (
     { uid },
     {
       fields: [
+        'updatedAt',
         'planet',
         'visitedPlanets.name',
         'visitedPlanets.id',
@@ -46,6 +48,7 @@ const getUser = async (
         'nextBoost',
         'landingTime',
       ],
+      lockMode: LockMode.PESSIMISTIC_READ,
     },
   );
 };
@@ -54,58 +57,62 @@ export const defineRoutes = async (
   app: core.Express,
   orm: MikroORM<IDatabaseDriver<Connection>>,
 ) => {
-  const fork = orm.em.fork();
-
   app.post('/login', async (req, res) => {
     try {
-      const token = await validateUser(req.headers.authorization);
+      const fork = orm.em.fork();
+      await fork.transactional(async (em) => {
+        const token = await validateUser(req.headers.authorization);
 
-      const user = await fork.findOne(
-        User,
-        { uid: token.uid },
-        { populate: ['items', 'planet', 'planet.items', 'visitedPlanets'] },
-      );
-
-      if (!user) {
-        const earth = await fork.findOneOrFail(
-          Planet,
-          { name: 'Earth' },
-          { populate: ['items'] },
+        const user = await em.findOne(
+          User,
+          { uid: token.uid },
+          {
+            populate: ['items', 'planet', 'planet.items', 'visitedPlanets'],
+            lockMode: LockMode.PESSIMISTIC_WRITE,
+          },
         );
 
-        let name;
-        do {
-          name = generateName();
-        } while (await fork.findOne(User, { username: name }));
+        if (!user) {
+          const earth = await em.findOneOrFail(
+            Planet,
+            { name: 'Earth' },
+            { populate: ['items'] },
+          );
 
-        const user = new User(token.uid, name, earth);
-        user.landOnPlanet(earth);
-        user.notification = generateWelcomeText();
+          let name;
+          do {
+            name = generateName();
+          } while (await em.findOne(User, { username: name }));
 
-        await fork.persistAndFlush(user);
+          const user = new User(token.uid, name, earth);
+          user.landOnPlanet(earth);
+          user.notification = generateWelcomeText();
 
-        res.status(201);
+          await em.persistAndFlush(user);
 
-        res.json(await getUser(fork, token.uid));
+          res.status(201);
 
-        user.notification = undefined;
-      } else {
-        if (!user.color) {
-          user.color = generateColor();
+          res.json(await serializeUser(orm.em, token.uid));
+
+          user.notification = undefined;
+        } else {
+          if (!user.color) {
+            user.color = generateColor();
+          }
+
+          user.updatePositions();
+          await em.persistAndFlush(user);
+
+          if (!user.notification && Math.random() < 0.01) {
+            user.notification = getRandomElement(quotes);
+          }
+
+          res.status(200);
+          res.json(await serializeUser(orm.em, token.uid));
+
+          user.notification = undefined;
         }
-
-        user.updatePositions();
-        await fork.persistAndFlush(user);
-
-        if (!user.notification && Math.random() < 0.01) {
-          user.notification = getRandomElement(quotes);
-        }
-
-        res.status(200);
-        res.json(await getUser(fork, token.uid));
-
-        user.notification = undefined;
-      }
+      });
     } catch (e) {
       console.error('Error', e);
       res.status(400);
@@ -136,31 +143,40 @@ export const defineRoutes = async (
 
   app.post('/speedboost', async (req, res) => {
     try {
-      const token = await validateUser(req.headers.authorization);
+      const fork = orm.em.fork();
+      await fork.transactional(async (em) => {
+        const token = await validateUser(req.headers.authorization);
 
-      const user = await getUser(fork, token.uid);
+        const user = await em.findOneOrFail(
+          User,
+          { uid: token.uid },
+          { populate: ['planet'], lockMode: LockMode.PESSIMISTIC_READ },
+        );
 
-      if (user.status !== UserStatus.TRAVELING || !user.nextBoost) {
-        res.status(400);
-        res.json('User is not traveling');
-        return;
-      }
+        if (user.status !== UserStatus.TRAVELING || !user.nextBoost) {
+          res.status(400);
+          res.json('User is not traveling');
+          return;
+        }
 
-      const time = new Date();
+        const time = new Date();
 
-      if (user.nextBoost.getTime() <= time.getTime()) {
-        user.speedBoost();
-        user.setLandingTime();
-        user.updateNextBoost();
+        if (user.nextBoost.getTime() <= time.getTime()) {
+          user.speedBoost();
+          user.setLandingTime();
+          user.updateNextBoost();
 
-        await fork.persistAndFlush(user);
+          await em.persistAndFlush(user);
 
-        res.status(200);
-        res.json(await getUser(fork, token.uid));
-      } else {
-        res.status(400);
-        res.json('User can not recieve speed boost yet');
-      }
+          res.status(200);
+
+          res.json(user);
+          // res.json(await serializeUser(em, token.uid));
+        } else {
+          res.status(400);
+          res.json('User can not recieve speed boost yet');
+        }
+      });
     } catch (e) {
       console.error('Error', e);
       res.status(400);
@@ -170,34 +186,41 @@ export const defineRoutes = async (
 
   app.post('/travelingTo/:id', async (req, res) => {
     try {
+      const em = orm.em.fork();
       const token = await validateUser(req.headers.authorization);
 
-      const user = await getUser(fork, token.uid);
-
-      const planet = await fork.findOne(Planet, {
-        id: Number(req.params.id),
-      });
-
-      if (!planet) {
-        res.status(404);
-        res.json(`Planet with id ${req.params.id} not found`);
-        return;
-      }
-
-      if (planet.id === user.planet.id) {
-        res.status(400);
-        res.json(
-          `User is already traveling to planet with id ${req.params.id}`,
+      await em.transactional(async (em) => {
+        const user = await em.findOneOrFail(
+          User,
+          { uid: token.uid },
+          { populate: ['planet'], lockMode: LockMode.PESSIMISTIC_WRITE },
         );
-        return;
-      }
 
-      user.updatePositions();
-      user.updateNextBoost();
-      user.startTraveling(planet);
+        const planet = await em.findOne(Planet, {
+          id: Number(req.params.id),
+        });
 
-      await fork.persistAndFlush(user);
-      res.json(await getUser(fork, token.uid));
+        if (!planet) {
+          res.status(404);
+          res.json(`Planet with id ${req.params.id} not found`);
+          return;
+        }
+
+        if (planet.id === user.planet.id) {
+          res.status(400);
+          res.json(
+            `User is already traveling to planet with id ${req.params.id}`,
+          );
+          return;
+        }
+
+        user.updatePositions();
+        user.updateNextBoost();
+        user.startTraveling(planet);
+
+        await em.persistAndFlush(user);
+        res.json(user);
+      });
     } catch (e) {
       console.error('Error', e);
       res.status(400);
@@ -206,10 +229,11 @@ export const defineRoutes = async (
   });
 
   app.post('/teleport/:id', async (req, res) => {
+    const fork = orm.em.fork();
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const user = await getUser(fork, token.uid);
+      const user = await fork.findOneOrFail(User, { uid: token.uid });
 
       if (!user.godmode) {
         res.status(401);
@@ -230,7 +254,7 @@ export const defineRoutes = async (
       user.updatePositions();
 
       await fork.persistAndFlush(user);
-      res.json(await getUser(fork, token.uid));
+      res.json(await serializeUser(orm.em, token.uid));
     } catch (e) {
       console.error('Error', e);
       res.status(400);
@@ -239,8 +263,9 @@ export const defineRoutes = async (
   });
 
   app.get('/userGroups', async (req, res) => {
+    const fork = orm.em.fork();
     const token = await validateUser(req.headers.authorization);
-    const user = await getUser(fork, token.uid);
+    const user = await serializeUser(orm.em, token.uid);
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const groupIds = user.groups.getIdentifiers() as number[];
@@ -252,33 +277,34 @@ export const defineRoutes = async (
 
   app.post('/userGroups', async (req, res) => {
     try {
-      const token = await validateUser(req.headers.authorization);
-      const user = await getUser(fork, token.uid);
+      const fork = orm.em.fork();
+      await fork.transactional(async (em) => {
+        const token = await validateUser(req.headers.authorization);
+        const user = await em.findOneOrFail(User, { uid: token.uid });
 
-      console.log(req.body);
+        if (
+          !req.body.name ||
+          typeof req.body.name !== 'string' ||
+          req.body.name.length > 20
+        ) {
+          res.status(400);
+          res.json('Invalid userGroup name');
+          return;
+        }
 
-      if (
-        !req.body.name ||
-        typeof req.body.name !== 'string' ||
-        req.body.name.length > 20
-      ) {
-        res.status(400);
-        res.json('Invalid userGroup name');
-        return;
-      }
+        if (await em.findOne(UserGroup, { name: req.body.name })) {
+          res.status(400);
+          res.json('Group name already exists');
+          return;
+        }
 
-      if (await fork.findOne(UserGroup, { name: req.body.name })) {
-        res.status(400);
-        res.json('Group name already exists');
-        return;
-      }
+        const group = new UserGroup();
+        group.name = req.body.name;
+        group.users.add(user);
 
-      const group = new UserGroup();
-      group.name = req.body.name;
-      group.users.add(user);
-
-      await fork.persistAndFlush(group);
-      res.json(group);
+        await em.persistAndFlush(group);
+        res.json(group);
+      });
     } catch (e) {
       console.error('Error', e);
       res.status(400);
@@ -288,34 +314,47 @@ export const defineRoutes = async (
 
   app.post('/joinGroup/:uuid', async (req, res) => {
     try {
+      const fork = orm.em.fork();
       const token = await validateUser(req.headers.authorization);
-      const user = await getUser(fork, token.uid);
+      await fork.transactional(async (em) => {
+        const user = await em.findOneOrFail(
+          User,
+          { uid: token.uid },
+          { populate: ['groups'], lockMode: LockMode.PESSIMISTIC_READ },
+        );
 
-      const uuid = req.params.uuid;
+        const uuid = req.params.uuid;
 
-      if (!req.params.uuid) {
-        res.status(400);
-        res.json('Invalid uuid');
-        return;
-      }
+        if (!req.params.uuid) {
+          res.status(400);
+          res.json('Invalid uuid');
+          return;
+        }
 
-      const group = await fork.findOne(UserGroup, { uuid });
-      if (!group) {
-        res.status(404);
-        res.json('Group not found');
-        return;
-      }
+        const group = await em.findOne(UserGroup, { uuid });
+        if (!group) {
+          res.status(404);
+          res.json('Group not found');
+          return;
+        }
 
-      if (user.groups.contains(group)) {
-        res.status(400);
-        res.json('User is already in group');
-        return;
-      }
+        if (user.groups.contains(group)) {
+          res.status(400);
+          res.json('User is already in group');
+          return;
+        }
 
-      group.users.add(user);
+        group.users.add(user);
 
-      await fork.persistAndFlush(group);
-      res.json(group);
+        em.persist(group);
+
+        return user;
+      });
+
+      const fork2 = orm.em.fork();
+      void fork2.transactional(async (em) => {
+        res.json(await serializeUser(em, token.uid));
+      });
     } catch (e) {
       console.error('Error', e);
       res.status(400);
