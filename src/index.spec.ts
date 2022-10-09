@@ -427,6 +427,27 @@ describe('userGroups', () => {
     expect(result.data.groups[0].users.length).toBe(2);
   });
 
+  it('the result should have the name of the group', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user2Config);
+
+    const group = await axiosClient.post(
+      '/userGroups',
+      { name: 'New Usergroup' },
+      user1Config,
+    );
+
+    const uuid = group.data.uuid;
+
+    const result = await axiosClient.post(
+      `joinGroup/${uuid}`,
+      undefined,
+      user2Config,
+    );
+
+    expect(result.data.groups[0].name).toBe('New Usergroup');
+  });
+
   it('internal details of users from other groups should not be visible', async () => {
     await axiosClient.post('/login', undefined, user1Config);
     const user2Login = await axiosClient.post('/login', undefined, user2Config);
@@ -443,7 +464,6 @@ describe('userGroups', () => {
     await axiosClient.post(`joinGroup/${uuid}`, undefined, user2Config);
 
     const result = await axiosClient.post('/login', undefined, user1Config);
-    console.log(result.data.groups[0].users);
     const user2 = result.data.groups[0].users.find(
       (user: { username: any }) => user.username === user2Username,
     );
