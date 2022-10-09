@@ -134,7 +134,6 @@ export class User extends Base {
 
     const elapsed = time.getTime() - last.getTime();
     if (elapsed < 0) {
-      console.log(time, last);
       throw new Error(`elapsed should not be less than 0: ${elapsed}`);
     }
 

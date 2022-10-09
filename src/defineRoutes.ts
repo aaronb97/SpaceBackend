@@ -3,7 +3,6 @@ import {
   Connection,
   EntityManager,
   IDatabaseDriver,
-  LockMode,
   MikroORM,
 } from '@mikro-orm/core';
 import { User, UserStatus } from './entities/User';
@@ -48,7 +47,6 @@ const serializeUser = async (
         'nextBoost',
         'landingTime',
       ],
-      lockMode: LockMode.PESSIMISTIC_READ,
     },
   );
 };
@@ -68,7 +66,6 @@ export const defineRoutes = async (
           { uid: token.uid },
           {
             populate: ['items', 'planet', 'planet.items', 'visitedPlanets'],
-            lockMode: LockMode.PESSIMISTIC_WRITE,
           },
         );
 
@@ -150,7 +147,7 @@ export const defineRoutes = async (
         const user = await em.findOneOrFail(
           User,
           { uid: token.uid },
-          { populate: ['planet'], lockMode: LockMode.PESSIMISTIC_READ },
+          { populate: ['planet'] },
         );
 
         if (user.status !== UserStatus.TRAVELING || !user.nextBoost) {
@@ -171,7 +168,6 @@ export const defineRoutes = async (
           res.status(200);
 
           res.json(user);
-          // res.json(await serializeUser(em, token.uid));
         } else {
           res.status(400);
           res.json('User can not recieve speed boost yet');
@@ -193,7 +189,7 @@ export const defineRoutes = async (
         const user = await em.findOneOrFail(
           User,
           { uid: token.uid },
-          { populate: ['planet'], lockMode: LockMode.PESSIMISTIC_WRITE },
+          { populate: ['planet'] },
         );
 
         const planet = await em.findOne(Planet, {
@@ -320,7 +316,7 @@ export const defineRoutes = async (
         const user = await em.findOneOrFail(
           User,
           { uid: token.uid },
-          { populate: ['groups'], lockMode: LockMode.PESSIMISTIC_READ },
+          { populate: ['groups'] },
         );
 
         const uuid = req.params.uuid;
@@ -351,10 +347,7 @@ export const defineRoutes = async (
         return user;
       });
 
-      const fork2 = orm.em.fork();
-      void fork2.transactional(async (em) => {
-        res.json(await serializeUser(em, token.uid));
-      });
+      res.json(await serializeUser(fork, token.uid));
     } catch (e) {
       console.error('Error', e);
       res.status(400);
