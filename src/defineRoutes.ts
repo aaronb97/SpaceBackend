@@ -215,7 +215,7 @@ export const defineRoutes = async (
         user.startTraveling(planet);
 
         await em.persistAndFlush(user);
-        res.json(user);
+        res.json(await serializeUser(em, token.uid));
       });
     } catch (e) {
       console.error('Error', e);
