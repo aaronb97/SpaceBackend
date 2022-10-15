@@ -427,6 +427,53 @@ describe('userGroups', () => {
     expect(result.data.groups[0].users.length).toBe(2);
   });
 
+  it('if there is no group with the supplied uuid, return 404', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user2Config);
+
+    await axiosClient.post(
+      '/userGroups',
+      { name: 'New Usergroup' },
+      user1Config,
+    );
+
+    const result = await axiosClient.post(
+      `joinGroup/random garbage`,
+      undefined,
+      user2Config,
+    );
+
+    expect(result.status).toBe(404);
+  });
+
+  it('if the user is already in the group, return 400', async () => {
+    await axiosClient.post('/login', undefined, user1Config);
+    await axiosClient.post('/login', undefined, user2Config);
+
+    const group = await axiosClient.post(
+      '/userGroups',
+      { name: 'New Usergroup' },
+      user1Config,
+    );
+
+    const uuid = group.data.uuid;
+
+    const result = await axiosClient.post(
+      `joinGroup/${uuid}`,
+      undefined,
+      user2Config,
+    );
+
+    const result2 = await axiosClient.post(
+      `joinGroup/${uuid}`,
+      undefined,
+      user2Config,
+    );
+
+    expect(result.status).toBe(200);
+    expect(result2.status).toBe(400);
+  });
+
   it('the result should have the name of the group', async () => {
     await axiosClient.post('/login', undefined, user1Config);
     await axiosClient.post('/login', undefined, user2Config);

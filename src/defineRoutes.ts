@@ -51,6 +51,28 @@ const serializeUser = async (
   );
 };
 
+class TransactionError extends Error {
+  constructor(public message: string, public code: number) {
+    super();
+  }
+}
+
+const handleError = (
+  e: unknown,
+  res: core.Response<any, Record<string, any>, number>,
+) => {
+  if (e instanceof TransactionError) {
+    console.error('Transaction eror', e);
+    res.status(e.code);
+    res.json(e.message);
+    return;
+  }
+
+  console.error('Error', e);
+  res.status(400);
+  res.json('Unknown error occured');
+};
+
 export const defineRoutes = async (
   app: core.Express,
   orm: MikroORM<IDatabaseDriver<Connection>>,
@@ -111,9 +133,7 @@ export const defineRoutes = async (
         }
       });
     } catch (e) {
-      console.error('Error', e);
-      res.status(400);
-      res.json('An error occured');
+      handleError(e, res);
     }
   });
 
@@ -151,9 +171,7 @@ export const defineRoutes = async (
         );
 
         if (user.status !== UserStatus.TRAVELING || !user.nextBoost) {
-          res.status(400);
-          res.json('User is not traveling');
-          return;
+          throw new TransactionError('User is not traveling', 400);
         }
 
         const time = new Date();
@@ -169,14 +187,14 @@ export const defineRoutes = async (
 
           res.json(user);
         } else {
-          res.status(400);
-          res.json('User can not recieve speed boost yet');
+          throw new TransactionError(
+            'User can not recieve speed boost yet',
+            400,
+          );
         }
       });
     } catch (e) {
-      console.error('Error', e);
-      res.status(400);
-      res.json('An error occurred');
+      handleError(e, res);
     }
   });
 
@@ -197,17 +215,17 @@ export const defineRoutes = async (
         });
 
         if (!planet) {
-          res.status(404);
-          res.json(`Planet with id ${req.params.id} not found`);
-          return;
+          throw new TransactionError(
+            `Planet with id ${req.params.id} not found`,
+            404,
+          );
         }
 
         if (planet.id === user.planet.id) {
-          res.status(400);
-          res.json(
+          throw new TransactionError(
             `User is already traveling to planet with id ${req.params.id}`,
+            400,
           );
-          return;
         }
 
         user.updatePositions();
@@ -218,9 +236,7 @@ export const defineRoutes = async (
         res.json(await serializeUser(em, token.uid));
       });
     } catch (e) {
-      console.error('Error', e);
-      res.status(400);
-      res.json('An error occurred');
+      handleError(e, res);
     }
   });
 
@@ -229,7 +245,11 @@ export const defineRoutes = async (
     try {
       const token = await validateUser(req.headers.authorization);
 
-      const user = await fork.findOneOrFail(User, { uid: token.uid });
+      const user = await fork.findOneOrFail(
+        User,
+        { uid: token.uid },
+        { populate: ['planet', 'visitedPlanets'] },
+      );
 
       if (!user.godmode) {
         res.status(401);
@@ -241,20 +261,19 @@ export const defineRoutes = async (
       });
 
       if (!planet) {
-        res.status(404);
-        res.json(`Planet with id ${req.params.id} not found`);
-        return;
+        throw new TransactionError(
+          `Planet with id ${req.params.id} not found`,
+          404,
+        );
       }
 
       user.landOnPlanet(planet, false);
       user.updatePositions();
 
       await fork.persistAndFlush(user);
-      res.json(await serializeUser(orm.em, token.uid));
+      res.json(await serializeUser(orm.em.fork(), token.uid));
     } catch (e) {
-      console.error('Error', e);
-      res.status(400);
-      res.json('An error occurred');
+      handleError(e, res);
     }
   });
 
@@ -283,15 +302,11 @@ export const defineRoutes = async (
           typeof req.body.name !== 'string' ||
           req.body.name.length > 20
         ) {
-          res.status(400);
-          res.json('Invalid userGroup name');
-          return;
+          throw new TransactionError('Invalid userGroup name', 400);
         }
 
         if (await em.findOne(UserGroup, { name: req.body.name })) {
-          res.status(400);
-          res.json('Group name already exists');
-          return;
+          throw new TransactionError('Group name already exists', 400);
         }
 
         const group = new UserGroup();
@@ -302,9 +317,7 @@ export const defineRoutes = async (
         res.json(group);
       });
     } catch (e) {
-      console.error('Error', e);
-      res.status(400);
-      res.json('An error occurred');
+      handleError(e, res);
     }
   });
 
@@ -322,22 +335,16 @@ export const defineRoutes = async (
         const uuid = req.params.uuid;
 
         if (!req.params.uuid) {
-          res.status(400);
-          res.json('Invalid uuid');
-          return;
+          throw new TransactionError('Invalid uuid', 400);
         }
 
         const group = await em.findOne(UserGroup, { uuid });
         if (!group) {
-          res.status(404);
-          res.json('Group not found');
-          return;
+          throw new TransactionError('Group not found', 404);
         }
 
         if (user.groups.contains(group)) {
-          res.status(400);
-          res.json('User is already in group');
-          return;
+          throw new TransactionError('User is already in group', 400);
         }
 
         group.users.add(user);
@@ -349,9 +356,7 @@ export const defineRoutes = async (
 
       res.json(await serializeUser(fork, token.uid));
     } catch (e) {
-      console.error('Error', e);
-      res.status(400);
-      res.json('An error occurred');
+      handleError(e, res);
     }
   });
 };
